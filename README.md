@@ -30,4 +30,24 @@ weather.py
 ## HACS Installation
 This Integration is not yet part of the default HACS store, but you can add it manually by going to `Settings` in HACS and then add `briis/mbweather` as an `Integration`.
 
+## Configuration
+Start by configuring the core platform. No matter which of the entities you activate, this has to be configured. The core platform by itself does nothing else than fetch the current data from *Meteobridge*, so by activating this you will not see any entities being created in Home Assistant.
+
+Edit your *configuration.yaml* file and add the *mbweather* component to the file:
+```yaml
+# Example configuration.yaml entry
+mbweather:
+  username: <your Meteobridge username>
+  password: <Your Meteobridge Password>
+  use_ssl: <false or true>
+```
+**username**:<br>
+(string)(Required) In order to access data on the *Meteobridge Data Logger* you will need the username and password you use to login with. Username will typically be **meteobridge**<br>
+
+**password**<br>
+(string)(Required) The password you are using to access your *Meteobridge Data Logger*.
+
+**use_ssl**<br>
+(string)(Optional) Type `True` if you access your Data Logger with *https*.<br>
+Default value: False
 **Page is being updated - Files are comming soon**

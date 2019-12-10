@@ -63,9 +63,11 @@ def setup(hass, config):
     password = conf[CONF_PASSWORD]
     name = conf[CONF_NAME]
     ssl = conf[CONF_USE_SLL]
+    unit_system = 'metric' if hass.config.units.is_metric else 'imperial'
+
     _LOGGER.debug("Value of SSL: %s ", ssl)
 
-    mbw = getWeatherData(host, username, password, ssl)
+    mbw = getWeatherData(host, username, password, ssl, unit_system)
     mbw.update()
     _LOGGER.debug("Data Returned: %s ", mbw.data)
 
@@ -79,17 +81,18 @@ def setup(hass, config):
 
 class getWeatherData:
 
-    def __init__(self, Host, User, Pass, ssl):
+    def __init__(self, Host, User, Pass, ssl, unit_system):
         self._host = Host
         self._user = User
         self._pass = Pass
         self._ssl = ssl
+        self._unit_system = unit_system
         self.data = None
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         """Get the latest data from the Weatherstation."""
-        mbdata = mbweatherData(self._host, self._user, self._pass, self._ssl)
+        mbdata = mbweatherData(self._host, self._user, self._pass, self._ssl, self._unit_system)
         self.data = mbdata
 
 class mbweatherData:
@@ -99,13 +102,15 @@ class mbweatherData:
         self._user = None
         self._pass = None
         self._ssl = None
+        self._unit_system = None
         self.data = None
    
-    def __new__(self, Host, User, Pass, ssl):
+    def __new__(self, Host, User, Pass, ssl, unit_system):
         self._host = Host
         self._user = User
         self._pass = Pass
         self._ssl = ssl
+        self._unit_system = unit_system
         self._winddir = ''
         self._windbearing = 0
         self._windgust = 0
@@ -182,22 +187,22 @@ class mbweatherData:
                     self._timestamp = datetime.strptime(values[0] + ' ' + values[1], '%d/%m/%Y %H:%M:%S')
 
                     self._outtemp = values[2]
-                    self._press = values[3]
+                    self._press = Conversion.pressure(float(values[3]),self._unit_system)
                     self._outhum = values[4]
-                    self._windspeedavg = values[5]
+                    self._windspeedavg = Conversion.speed(float(values[5]), self._unit_system)
                     self._windbearing = int(float(values[6]))
-                    self._winddir = mbhelpers.wind_direction(float(values[6]))
-                    self._raintoday = values[7]
-                    self._rainrate = values[8]
+                    self._winddir = Conversion.wind_direction(float(values[6]))
+                    self._raintoday = Conversion.volume(float(values[7]), self._unit_system)
+                    self._rainrate = Conversion.rate(float(values[8]), self._unit_system)
                     self._outdew = values[9]
                     self._windchill = values[10]
-                    self._windgust = values[11]
+                    self._windgust = Conversion.speed(float(values[11]), self._unit_system)
                     self._lowbat = values[12]
                     self._intemp = values[13]
                     self._inhum = values[14]
                     self._temphigh = values[15]
                     self._templow = values[16]
-                    self._windspeed = values[17]
+                    self._windspeed = Conversion.speed(float(values[17]), self._unit_system)
                     self._fc = values[18]
 
                     if float(self._outtemp) < 0:
@@ -215,8 +220,66 @@ class mbweatherData:
                     else:
                         self._islowbat = False
 
-class mbhelpers:
-    
+class Conversion:
+
+    """
+    Conversion Class to convert between different units.
+    WeatherFlow always delivers values in the following formats:
+    Temperature: C
+    Wind Speed: m/s
+    Wind Direction: Degrees
+    Pressure: mb
+    Distance: km
+    """
+
+    def temperature(value, unit):
+        if unit.lower() == 'imperial':
+            # Return value F
+            return round((value*9/5)+32,1)
+        else:
+            # Return value C
+            return round(value,1)
+
+    def volume(value, unit):
+        if unit.lower() == 'imperial':
+            # Return value in
+            return round(value * 0.0393700787,2)
+        else:
+            # Return value mm
+            return round(value,1)
+
+    def rate(value, unit):
+        if unit.lower() == 'imperial':
+            # Return value in
+            return round(value * 0.0393700787,2)
+        else:
+            # Return value mm
+            return round(value,2)
+
+    def pressure(value, unit):
+        if unit.lower() == 'imperial':
+            # Return value inHg
+            return round(value * 0.0295299801647,3)
+        else:
+            # Return value mb
+            return round(value,1)
+
+    def speed(value, unit):
+        if unit.lower() == 'imperial':
+            # Return value in mi/h
+            return round(value*2.2369362921,1)
+        else:
+            # Return value in m/s
+            return round(value,1)
+
+    def distance(value, unit):
+        if unit.lower() == 'imperial':
+            # Return value in mi
+            return round(value*0.621371192,1)
+        else:
+            # Return value in m/s
+            return round(value,0)
+
     def wind_direction(bearing):
         direction_array = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW','N']
         direction = direction_array[int((bearing + 11.25) / 22.5)]

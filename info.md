@@ -13,4 +13,4 @@ This Custom Integration consist of 4 parts:
 
 The `mbweather` component uses a built-in REST API from Meteobridge to retrieve current data for a local WeatherStation, which means that if you don't use the *Weather* component, everything is running inside your local network.
 
-Setup Instructions can be found here
+[Setup Instructions can be found here](https://github.com/briis/mbweather/blob/master/README.md)

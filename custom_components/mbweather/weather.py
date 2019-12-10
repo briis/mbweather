@@ -135,7 +135,8 @@ class DarkSkyWeather(WeatherEntityExt):
     @property
     def temperature(self):
         """Return the temperature."""
-        return float(self._curdata.data['temperature'])
+        return round((float(self._curdata.data['temperature'])*9/5)+32,1) if 'us' in self._dark_sky.units \
+            else float(self._curdata.data['temperature'])
 
     @property
     def temperature_unit(self):
@@ -178,8 +179,9 @@ class DarkSkyWeather(WeatherEntityExt):
     @property
     def pressure(self):
         """Return the pressure."""
-        return round(convert_pressure(float(self._curdata.data['pressure']), PRESSURE_HPA, PRESSURE_INHG), 2) if 'us' in self._dark_sky.units \
-            else round(float(self._curdata.data['pressure']), 1)
+        return round(float(self._curdata.data['pressure']), 1)
+        # return round(convert_pressure(float(self._curdata.data['pressure']), PRESSURE_HPA, PRESSURE_INHG), 2) if 'us' in self._dark_sky.units \
+        #     else round(float(self._curdata.data['pressure']), 1)
 
     @property
     def visibility(self):

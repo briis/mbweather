@@ -1,0 +1,8 @@
+{
+    "domain": "mbweather",
+    "name": "Meteobridge Weather",
+    "documentation": "https://github.com/briis/mbweather",
+    "dependencies": [],
+    "codeowners": ["@briis"],
+    "requirements": []
+}

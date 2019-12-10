@@ -3,7 +3,7 @@
     This component will read the local weatherstation data
     and create sensors for each type.
 
-    For a full description, go here: https://github.com/briis/hass-mbweather
+    For a full description, go here: https://github.com/briis/mbweather
 
     Author: Bjarne Riis
 """

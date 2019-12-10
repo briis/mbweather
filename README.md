@@ -9,14 +9,14 @@ This Custom Integration consist of 4 parts:
 1. The main component which sets up the link to the Meteobridge Data Logger
 2. A *Binary Sensor* component, that gives a couple of binary sensors, derived from the data delivered
 3. A *Sensor* component delivering realtime data from the Data Logger
-4. A Home Assistant *Weather* component, that retrieves Forecast data from *Dark Sky* and then replaces Dark Skys currwent data with the data from the local weatherstation
+4. A Home Assistant *Weather* component, that retrieves Forecast data from *Dark Sky* and then replaces Dark Skys current data with the data from the local weatherstation
 
 The `mbweather` component uses a built-in REST API from Meteobridge to retrieve current data for a local WeatherStation, which means that if you don't use the *Weather* component, everything is running inside your local network
 
 ## Manual Installation
 To add MBWEATHER to your installation, create this folder structure in your /config directory:
 
-“custom_components/mbweather.
+`custom_components/mbweather`.
 Then, drop the following files into that folder:
 
 ```yaml

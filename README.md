@@ -37,10 +37,14 @@ Edit your *configuration.yaml* file and add the *mbweather* component to the fil
 ```yaml
 # Example configuration.yaml entry
 mbweather:
+  host: <ip address of your Meteobridge Logger>
   username: <your Meteobridge username>
   password: <Your Meteobridge Password>
   use_ssl: <false or true>
 ```
+**host**:<br>
+(string)(Required) Type the IP address of your *Meteobridge Logger*. Example: `192.168.1.10`<br>
+
 **username**:<br>
 (string)(Required) In order to access data on the *Meteobridge Data Logger* you will need the username and password you use to login with. Username will typically be **meteobridge**<br>
 
@@ -50,4 +54,27 @@ mbweather:
 **use_ssl**<br>
 (string)(Optional) Type `True` if you access your Data Logger with *https*.<br>
 Default value: False
+
+### Binary Sensor
+In order to use the Binary Sensors, add the following to your *configuration.yaml* file:
+```yaml
+# Example configuration.yaml entry
+binary_sensor:
+  - platform: mbweather
+    monitored_conditions:
+      - raining
+      - freezing
+      - lowbattery
+```
+#### Configuration Variables
+**name**<br>
+(string)(Optional) Additional name for the sensors.<br>
+Default value: mbw
+
+**monitored_conditions**<br>
+(list)(optional) Sensors to display in the frontend.<br>
+Default: If ommitted all Sensors are displayed
+* **raining** - A sensor indicating if it is currently raining
+* **freezing** - A sensor indicating if it is currently freezing outside.
+* **lowbattery** - A sensor indicating if the attached Weather Station is running low on Battery
 **Page is being updated - Files are comming soon**

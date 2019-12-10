@@ -77,4 +77,5 @@ Default: If ommitted all Sensors are displayed
 * **raining** - A sensor indicating if it is currently raining
 * **freezing** - A sensor indicating if it is currently freezing outside.
 * **lowbattery** - A sensor indicating if the attached Weather Station is running low on Battery
+
 **Page is being updated - Files are comming soon**

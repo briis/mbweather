@@ -136,4 +136,26 @@ Default: All Sensors are displayed
 * **condition** - Current condition state. Only supplies data if the `weather` component is activated.
 * **forecast** - A string with the current weather forecast, delivered by the local Weather Station. **Note:** Not all Weather Station will deliver this. I only know of the Davis Weather Stations for now.
 
-**Page is being updated - Files are comming soon**
+### Weather
+The Weather Entity uses Dark Sky for forecast data. So in order to use this Entity you must obtain a API Key from Dark Sky. The API key is free but requires registration. You can make up to 1000 calls per day for free which means that you could make one approximately every 86 seconds.
+
+The difference between using this entity and the standard Dark Sky entity, is that *Current* data is coming from the local weather station, making it much more accurate than that what Dark Sky delivers.
+
+On top of the standard attributes that a weather entity has available, the following additional attributes have been added to this Weather Entity: *Rain Today and Rain Rate*. These are all *Current* values.
+
+In order to use the Weather component, add the following to your *configuration.yaml* file:
+```yaml
+# Example configuration.yaml entry
+weather:
+  - platform: mbweather
+    api_key: <Your Dark Sky API key>
+```
+#### Configuration Variables
+**api_key**<br>
+(string)(Required) Your API key.<br>
+**name**<br>
+(string)(Optional) Additional name for the sensors.<br>
+Default value: mbw<br>
+**mode**<br>
+(string)(Optional) *hourly* for hour based forecast, and *daily* for day based forecast<br>
+Default value: hourly

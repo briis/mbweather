@@ -78,4 +78,62 @@ Default: If ommitted all Sensors are displayed
 * **freezing** - A sensor indicating if it is currently freezing outside.
 * **lowbattery** - A sensor indicating if the attached Weather Station is running low on Battery
 
+### Sensor
+In order to use the Sensors, add the following to your *configuration.yaml* file:
+```yaml
+# Example configuration.yaml entry
+sensor:
+  - platform: mbweather
+    wind_unit: kmh
+    monitored_conditions:
+      - temperature
+      - temphigh
+      - templow
+      - dewpoint
+      - windchill
+      - windspeedavg
+      - windspeed
+      - windbearing
+      - winddirection
+      - windgust
+      - raintoday
+      - rainrate
+      - humidity
+      - pressure
+      - in_temperature
+      - in_humidity
+      - condition
+      - forecast
+```
+#### Configuration Variables
+**wind_unit**<br>
+(string)(optional) If Home Assistant Unit System is *metric*, specify `kmh` to get units in km/h. Else this has no effect.<br>
+Default Value: m/s if Home Assistant Unit System is *metric*, and mph if Unit System is *imperial*
+
+**name**<br>
+(string)(Optional) Additional name for the sensors.<br>
+Default value: mbw
+
+**monitored_conditions**<br>
+(list)(optional) Sensors to display in the frontend.<br>
+Default: All Sensors are displayed
+* **temperature** - Current temperature
+* **temphigh** - Highest temperature meassured today
+* **templow** - Lowest temperature meassured today
+* **dewpoint** - Dewpoint. The atmospheric temperature (varying according to pressure and humidity) below which water droplets begin to condense and dew can form
+* **windchill** - How cold does it feel. Only valid if temperature is below 10°C (50°F)
+* **windspeedavg** - Average Wind Speed in the last 10 minuttes
+* **windspeed** - Current Wind Speed
+* **windbearing** - Wind bearing in degrees (Example: 287°)
+* **winddirection** - Wind bearing as directional text (Example: NNW)
+* **windgust** - Highest Wind Speed in the last minute
+* **raintoday** - Precipitation since midnight
+* **rainrate** - The current precipitation rate - 0 if it is not raining
+* **humidity** - Current humidity in %
+* **pressure** - Current barometric pressure, taking in to account the position of the station
+* **in_temperature** - Temperature meassured by the Meteobridge Logger
+* **in_humidity** - Humidity meassured by the Meteobridge Logger
+* **condition** - Current condition state. Only supplies data if the `weather` component is activated.
+* **forecast** - A string with the current weather forecast, delivered by the local Weather Station. **Note:** Not all Weather Station will deliver this. I only know of the Davis Weather Stations for now.
+
 **Page is being updated - Files are comming soon**

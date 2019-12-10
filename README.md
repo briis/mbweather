@@ -13,4 +13,21 @@ This Custom Integration consist of 4 parts:
 
 The `mbweather` component uses a built-in REST API from Meteobridge to retrieve current data for a local WeatherStation, which means that if you don't use the *Weather* component, everything is running inside your local network
 
+## Manual Installation
+To add MBWEATHER to your installation, create this folder structure in your /config directory:
+
+“custom_components/mbweather.
+Then, drop the following files into that folder:
+
+```yaml
+__init__.py
+manifest.json
+sensor.py
+binary_sensor.py
+weather.py
+```
+
+## HACS Installation
+This Integration is not yet part of the default HACS store, but you can add it manually by going to `Settings` in HACS and then add `briis/mbweather` as an `Integration`.
+
 **Page is being updated - Files are comming soon**

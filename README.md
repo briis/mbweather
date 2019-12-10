@@ -152,7 +152,7 @@ weather:
 ```
 #### Configuration Variables
 **api_key**<br>
-(string)(Required) Your API key.<br>
+(string)(Required) Your Dark Sky API key.<br>
 **name**<br>
 (string)(Optional) Additional name for the sensors.<br>
 Default value: mbw<br>

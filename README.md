@@ -13,6 +13,9 @@ This Custom Integration consist of 4 parts:
 
 The `mbweather` component uses a built-in REST API from Meteobridge to retrieve current data for a local WeatherStation, which means that if you don't use the *Weather* component, everything is running inside your local network
 
+## Requirements
+This Custom Integration requires that you have a *Meteobridge HW Device* connected to a Weather Station on your local Network.
+
 ## Manual Installation
 To add MBWEATHER to your installation, create this folder structure in your /config directory:
 

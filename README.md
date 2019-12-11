@@ -131,8 +131,8 @@ Default: All Sensors are displayed
 * **rainrate** - The current precipitation rate - 0 if it is not raining
 * **humidity** - Current humidity in %
 * **pressure** - Current barometric pressure, taking in to account the position of the station
-* **in_temperature** - Temperature meassured by the Meteobridge Logger
-* **in_humidity** - Humidity meassured by the Meteobridge Logger
+* **in_temperature** - Temperature meassured by the Meteobridge Logger (indoor)
+* **in_humidity** - Humidity meassured by the Meteobridge Logger (indoor)
 * **condition** - Current condition state. Only supplies data if the `weather` component is activated.
 * **forecast** - A string with the current weather forecast, delivered by the local Weather Station. **Note:** Not all Weather Station will deliver this. I only know of the Davis Weather Stations for now.
 

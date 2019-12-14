@@ -180,8 +180,6 @@ class DarkSkyWeather(WeatherEntityExt):
     def pressure(self):
         """Return the pressure."""
         return round(float(self._curdata.data['pressure']), 1)
-        # return round(convert_pressure(float(self._curdata.data['pressure']), PRESSURE_HPA, PRESSURE_INHG), 2) if 'us' in self._dark_sky.units \
-        #     else round(float(self._curdata.data['pressure']), 1)
 
     @property
     def visibility(self):

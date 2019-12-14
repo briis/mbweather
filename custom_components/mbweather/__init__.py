@@ -65,8 +65,6 @@ def setup(hass, config):
     ssl = conf[CONF_USE_SLL]
     unit_system = 'metric' if hass.config.units.is_metric else 'imperial'
 
-    _LOGGER.debug("Value of SSL: %s ", ssl)
-
     mbw = getWeatherData(host, username, password, ssl, unit_system)
     mbw.update()
     _LOGGER.debug("Data Returned: %s ", mbw.data)
@@ -133,7 +131,6 @@ class mbweatherData:
         self._isfreezing = False
         self._islowbat = False
         self._timestamp = None
-        self._condition = 'Requires Weather Component'
 
         self.data = self._getData(self)
 
@@ -158,7 +155,6 @@ class mbweatherData:
             'raining': self._israining,
             'freezing': self._isfreezing,
             'forecast': self._fc,
-            'condition': self._condition,
             'time': self._timestamp
             }
         
@@ -172,7 +168,6 @@ class mbweatherData:
 
         reqUrl = preUrl + self._user + ':' + self._pass + '@' + self._host + '/cgi-bin/template.cgi?template=' + dataRequest
         # reqUrl = 'http://docker.for.mac.localhost/mbhaweather.txt'
-        _LOGGER.debug('URL: ' + reqUrl)
 
         with requests.Session() as s:
             response = s.get(reqUrl)

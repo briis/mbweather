@@ -1,6 +1,8 @@
 # Meteobridge Weather for Home Assistant
 ![GitHub release](https://img.shields.io/github/release/briis/mbweather.svg)
 
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
+
 This a *Custom Integration* for [Home Assistant](https://www.home-assistant.io/). It combines real-time weather readings from a Meteobridge Weather Logger and Forecast data from *Dark Sky*.
 
 [*Meteobridge*](https://www.meteobridge.com/wiki/index.php/Home) is a small device that connects your personal weather station to public weather networks like "Weather Underground". This allows you to feed your micro climate data to a weather network in the Internet and to have it there visible from wherever you are. Meteobridge also has many ways of delivering data to your local network, and this furthermore reduces the dependencies for Cloud Services when you need very local Weather Data.<br>
@@ -33,7 +35,7 @@ weather.py
 ```
 
 ## HACS Installation
-This Integration is not yet part of the default HACS store, but you can add it manually by going to `Settings` in HACS and then add `briis/mbweather` as an `Integration`.
+This Integration is part of the default HACS store, so search for *Meteobridge Weather* in HACS.
 
 ## Configuration
 Start by configuring the core platform. No matter which of the entities you activate, this has to be configured. The core platform by itself does nothing else than fetch the current data from *Meteobridge*, so by activating this you will not see any entities being created in Home Assistant.

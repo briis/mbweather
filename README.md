@@ -1,7 +1,6 @@
 # Meteobridge Weather for Home Assistant
 ![GitHub release](https://img.shields.io/github/release/briis/mbweather.svg)
-
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
 This a *Custom Integration* for [Home Assistant](https://www.home-assistant.io/). It combines real-time weather readings from a Meteobridge Weather Logger and Forecast data from *Dark Sky*.
 

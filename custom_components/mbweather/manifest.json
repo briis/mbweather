@@ -4,5 +4,5 @@
     "documentation": "https://github.com/briis/mbweather",
     "dependencies": [],
     "codeowners": ["@briis"],
-    "requirements": []
+    "requirements": ["python-forecastio==1.4.0"]
 }

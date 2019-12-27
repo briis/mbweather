@@ -4,7 +4,7 @@ import logging
 import requests
 import csv
 from datetime import timedelta, datetime
-from dateutil import tz
+# from dateutil import tz
 
 import voluptuous as vol
 
@@ -132,7 +132,7 @@ class mbweatherData:
         self._islowbat = False
         self._timestamp = None
 
-        self.data = self._getData(self)
+        self._getData(self)
 
         retval = {
             'in_temperature': self._intemp,
@@ -178,26 +178,28 @@ class mbweatherData:
                 _LOGGER.debug("Raw: " + decoded_content)
                 cr = csv.reader(decoded_content.splitlines(), delimiter=';')
                 rows = list(cr)
+                cnv = Conversion()
+
                 for values in rows:
                     self._timestamp = datetime.strptime(values[0] + ' ' + values[1], '%d/%m/%Y %H:%M:%S')
 
                     self._outtemp = values[2]
-                    self._press = Conversion.pressure(float(values[3]),self._unit_system)
+                    self._press = cnv.pressure(float(values[3]),self._unit_system)
                     self._outhum = values[4]
-                    self._windspeedavg = Conversion.speed(float(values[5]), self._unit_system)
+                    self._windspeedavg = cnv.speed(float(values[5]), self._unit_system)
                     self._windbearing = int(float(values[6]))
-                    self._winddir = Conversion.wind_direction(float(values[6]))
-                    self._raintoday = Conversion.volume(float(values[7]), self._unit_system)
-                    self._rainrate = Conversion.rate(float(values[8]), self._unit_system)
+                    self._winddir = cnv.wind_direction(float(values[6]))
+                    self._raintoday = cnv.volume(float(values[7]), self._unit_system)
+                    self._rainrate = cnv.rate(float(values[8]), self._unit_system)
                     self._outdew = values[9]
                     self._windchill = values[10]
-                    self._windgust = Conversion.speed(float(values[11]), self._unit_system)
+                    self._windgust = cnv.speed(float(values[11]), self._unit_system)
                     self._lowbat = values[12]
                     self._intemp = values[13]
                     self._inhum = values[14]
                     self._temphigh = values[15]
                     self._templow = values[16]
-                    self._windspeed = Conversion.speed(float(values[17]), self._unit_system)
+                    self._windspeed = cnv.speed(float(values[17]), self._unit_system)
                     self._fc = values[18]
 
                     if float(self._outtemp) < 0:
@@ -227,7 +229,7 @@ class Conversion:
     Distance: km
     """
 
-    def temperature(value, unit):
+    def temperature(self, value, unit):
         if unit.lower() == 'imperial':
             # Return value F
             return round((value*9/5)+32,1)
@@ -235,7 +237,7 @@ class Conversion:
             # Return value C
             return round(value,1)
 
-    def volume(value, unit):
+    def volume(self, value, unit):
         if unit.lower() == 'imperial':
             # Return value in
             return round(value * 0.0393700787,2)
@@ -243,7 +245,7 @@ class Conversion:
             # Return value mm
             return round(value,1)
 
-    def rate(value, unit):
+    def rate(self, value, unit):
         if unit.lower() == 'imperial':
             # Return value in
             return round(value * 0.0393700787,2)
@@ -251,7 +253,7 @@ class Conversion:
             # Return value mm
             return round(value,2)
 
-    def pressure(value, unit):
+    def pressure(self, value, unit):
         if unit.lower() == 'imperial':
             # Return value inHg
             return round(value * 0.0295299801647,3)
@@ -259,7 +261,7 @@ class Conversion:
             # Return value mb
             return round(value,1)
 
-    def speed(value, unit):
+    def speed(self, value, unit):
         if unit.lower() == 'imperial':
             # Return value in mi/h
             return round(value*2.2369362921,1)
@@ -267,7 +269,7 @@ class Conversion:
             # Return value in m/s
             return round(value,1)
 
-    def distance(value, unit):
+    def distance(self, value, unit):
         if unit.lower() == 'imperial':
             # Return value in mi
             return round(value*0.621371192,1)
@@ -275,7 +277,7 @@ class Conversion:
             # Return value in m/s
             return round(value,0)
 
-    def wind_direction(bearing):
+    def wind_direction(self, bearing):
         direction_array = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW','N']
         direction = direction_array[int((bearing + 11.25) / 22.5)]
         return direction

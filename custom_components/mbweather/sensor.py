@@ -39,6 +39,8 @@ SENSOR_TYPES = {
     'in_temperature': ['Indoor Temp', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
     'dewpoint': ['Dewpoint', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
     'windchill': ['Wind Chill', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
+    'heatindex': ['Heatindex', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
+    'feels_like': ['Feels Like', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
     'windspeedavg': ['Wind Speed Avg', 'm/s', 'mdi:weather-windy', None, 'mph'],
     'windspeed': ['Wind Speed', 'm/s', 'mdi:weather-windy', None, 'mph'],
     'windbearing': ['Wind Bearing', '°', 'mdi:compass-outline', None, None],

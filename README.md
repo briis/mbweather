@@ -97,6 +97,8 @@ sensor:
       - templow
       - dewpoint
       - windchill
+      - heatindex
+      - feels_like
       - windspeedavg
       - windspeed
       - windbearing
@@ -128,6 +130,8 @@ Default: All Sensors are displayed
 * **templow** - Lowest temperature meassured today
 * **dewpoint** - Dewpoint. The atmospheric temperature (varying according to pressure and humidity) below which water droplets begin to condense and dew can form
 * **windchill** - How cold does it feel. Only valid if temperature is below 10°C (50°F)
+* **heatindex** - How warm it feals. Only valid if temperature is above 26.67°C (80°F)
+* **feels_like** - How the temperature is feeling.
 * **windspeedavg** - Average Wind Speed in the last 10 minuttes
 * **windspeed** - Current Wind Speed
 * **windbearing** - Wind bearing in degrees (Example: 287°)

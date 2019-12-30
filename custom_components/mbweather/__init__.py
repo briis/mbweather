@@ -4,7 +4,6 @@ import logging
 import requests
 import csv
 from datetime import timedelta, datetime
-# from dateutil import tz
 
 import voluptuous as vol
 
@@ -116,6 +115,8 @@ class mbweatherData:
         self._windspeed = 0
         self._lowbat = False
         self._windchill = 0
+        self._heatindex = 0
+        self._feels_like = 0
         self._intemp = 0
         self._inhum = 0
         self._press = 0
@@ -148,6 +149,8 @@ class mbweatherData:
             'windspeed': self._windspeed,
             'windgust': self._windgust,
             'windchill': self._windchill,
+            'heatindex': self._heatindex,
+            'feels_like': self._feels_like,
             'pressure': self._press,
             'rainrate': self._rainrate,
             'raintoday': self._raintoday,
@@ -161,7 +164,7 @@ class mbweatherData:
         return retval
 
     def _getData(self):
-        dataRequest = '[DD]/[MM]/[YYYY];[hh]:[mm]:[ss];[th0temp-act:--];[thb0seapress-act:--];[th0hum-act:--];[wind0avgwind-act:--];[wind0dir-avg5.0:--];[rain0total-daysum:--];[rain0rate-act:--];[th0dew-act:--];[wind0chill-act:--];[wind0wind-max1:--];[th0lowbat-act.0:--];[thb0temp-act:--];[thb0hum-act.0:--];[th0temp-dmax:--];[th0temp-dmin:--];[wind0wind-act:--];[forecast-text:]'
+        dataRequest = '[DD]/[MM]/[YYYY];[hh]:[mm]:[ss];[th0temp-act:0];[thb0seapress-act:--];[th0hum-act:--];[wind0avgwind-act:--];[wind0dir-avg5.0:--];[rain0total-daysum:--];[rain0rate-act:--];[th0dew-act:--];[wind0chill-act:0];[wind0wind-max1:--];[th0lowbat-act.0:--];[thb0temp-act:--];[thb0hum-act.0:--];[th0temp-dmax:--];[th0temp-dmin:--];[wind0wind-act:--];[th0heatindex-act.1:0];[forecast-text:]'
         preUrl = 'https://'
         if self._ssl.lower() != 'true':
             preUrl = 'http://'
@@ -200,7 +203,9 @@ class mbweatherData:
                     self._temphigh = values[15]
                     self._templow = values[16]
                     self._windspeed = cnv.speed(float(values[17]), self._unit_system)
-                    self._fc = values[18]
+                    self._heatindex = values[18]
+                    self._feels_like = cnv.feels_like(self._outtemp,self._heatindex, self._windchill)
+                    self._fc = values[19]
 
                     if float(self._outtemp) < 0:
                         self._isfreezing = True
@@ -276,6 +281,15 @@ class Conversion:
         else:
             # Return value in m/s
             return round(value,0)
+
+    def feels_like(self, temp, heatindex, windchill):
+        """ Return Feels Like Temp."""
+        if (float(temp) > 26.666666667):
+            return float(heatindex)
+        elif (float(temp) < 10):
+            return float(windchill)
+        else:
+            return temp
 
     def wind_direction(self, bearing):
         direction_array = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW','N']

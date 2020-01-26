@@ -9,6 +9,7 @@
 """
 import logging
 import voluptuous as vol
+from datetime import timedelta
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -18,29 +19,30 @@ from homeassistant.const import (ATTR_ATTRIBUTION, CONF_MONITORED_CONDITIONS,
                                  DEVICE_CLASS_ILLUMINANCE,
                                  DEVICE_CLASS_PRESSURE,
                                  DEVICE_CLASS_TEMPERATURE, LENGTH_METERS,
-                                 TEMP_CELSIUS, UNIT_UV_INDEX)
+                                 TEMP_CELSIUS, TEMP_FAHRENHEIT)
 from homeassistant.helpers.entity import Entity, generate_entity_id
 
-from . import ATTRIBUTION, MBDATA
+from . import DEFAULT_ATTRIBUTION, MBDATA, DOMAIN
 
 DEPENDENCIES = ['mbweather']
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = 'mbweather'
 CONF_WIND_UNIT = 'wind_unit'
 
 ATTR_UPDATED = 'updated'
 
+SCAN_INTERVAL = timedelta(seconds=5)
+
 SENSOR_TYPES = {
-    'temperature': ['Temperature', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
-    'temphigh': ['Temp High Today', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
-    'templow': ['Temp Low Today', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
-    'in_temperature': ['Indoor Temp', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
-    'dewpoint': ['Dewpoint', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
-    'windchill': ['Wind Chill', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
-    'heatindex': ['Heatindex', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
-    'feels_like': ['Feels Like', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, None],
+    'temperature': ['Temperature', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, TEMP_FAHRENHEIT],
+    'temphigh': ['Temp High Today', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, TEMP_FAHRENHEIT],
+    'templow': ['Temp Low Today', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, TEMP_FAHRENHEIT],
+    'in_temperature': ['Indoor Temp', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, TEMP_FAHRENHEIT],
+    'dewpoint': ['Dewpoint', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, TEMP_FAHRENHEIT],
+    'windchill': ['Wind Chill', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, TEMP_FAHRENHEIT],
+    'heatindex': ['Heatindex', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, TEMP_FAHRENHEIT],
+    'feels_like': ['Feels Like', TEMP_CELSIUS, 'mdi:thermometer', DEVICE_CLASS_TEMPERATURE, TEMP_FAHRENHEIT],
     'windspeedavg': ['Wind Speed Avg', 'm/s', 'mdi:weather-windy', None, 'mph'],
     'windspeed': ['Wind Speed', 'm/s', 'mdi:weather-windy', None, 'mph'],
     'windbearing': ['Wind Bearing', '°', 'mdi:compass-outline', None, None],
@@ -70,7 +72,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     data = hass.data[MBDATA]
     wind_unit = config.get(CONF_WIND_UNIT)
 
-    if data.data['time'] is None:
+    if not data:
         return
 
     sensors = []
@@ -84,10 +86,11 @@ class MBWeatherSensor(Entity):
 
     def __init__(self, hass, data, condition, name, unit_system, wind_unit):
         """Initialize the sensor."""
+        self.data = data.sensors
         self._condition = condition
         self._unit_system = unit_system
         self._wind_unit = wind_unit
-        self.data = data
+        self._state = self.data[self._condition]
         self._name = SENSOR_TYPES[self._condition][0]
         self.entity_id = generate_entity_id(ENTITY_ID_FORMAT, '{} {}'.format('mbw', SENSOR_TYPES[self._condition][0]), hass=hass)
 
@@ -101,19 +104,17 @@ class MBWeatherSensor(Entity):
         """Return the state of the sensor."""
         _LOGGER.debug("Sensor: %s",self._condition)
         if self._condition == 'condition':
-            if (not 'condition' in self.data.data):
+            if (not 'condition' in self.data):
                 return 'Requires Weather Component'
 
-        if self._condition in self.data.data:
-            variable = self.data.data[self._condition]
-
-            if not (variable is None):
+        if self._condition in self.data:
+            if not (self._state is None):
                 if SENSOR_TYPES[self._condition][1] == 'm/s':
                     return round(variable*3.6,1) \
                         if self._wind_unit == 'kmh' \
-                        else variable
+                        else self._state
                 else:
-                    return variable
+                    return self._state
         return None
 
     @property
@@ -143,11 +144,11 @@ class MBWeatherSensor(Entity):
     def device_state_attributes(self):
         """Return the state attributes of the device."""
         attr = {}
-        attr[ATTR_ATTRIBUTION] = ATTRIBUTION
-        attr[ATTR_UPDATED] = self.data.data['time']
+        attr[ATTR_ATTRIBUTION] = DEFAULT_ATTRIBUTION
+        attr[ATTR_UPDATED] = self.data['time']
 
         return attr
 
     def update(self):
         """Update current conditions."""
-        self.data.update()
+        self._state = self.data[self._condition]

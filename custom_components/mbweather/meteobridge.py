@@ -101,7 +101,8 @@ class meteobridge:
                 "raining": self._israining,
                 "freezing": self._isfreezing,
                 "forecast": self._fc,
-                "time": self._timestamp.strftime("%d-%m-%Y %H:%M:%S")
+                "time": self._timestamp.strftime("%d-%m-%Y %H:%M:%S"),
+                "condition": None
             }
             self.sensor_data.update(item)
 

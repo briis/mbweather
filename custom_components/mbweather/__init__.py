@@ -41,12 +41,11 @@ ATTR_WEATHER_WIND_SPEED = "wind_speed"
 ATTR_WEATHER_RAINTODAY = "rain_today"
 ATTR_WEATHER_RAINRATE = "rain_rate"
 
-ATTRIBUTION = "Weather data delivered by a Meteobridge powered Weather Station"
-
 DOMAIN = 'mbweather'
 MBDATA = DOMAIN
 CONF_USE_SLL = 'use_ssl'
 
+DEFAULT_ATTRIBUTION = "Weather data delivered by a Meteobridge powered Weather Station"
 DEFAULT_SCAN_INTERVAL = timedelta(seconds=10)
 
 CONFIG_SCHEMA = vol.Schema({
@@ -72,7 +71,7 @@ def setup(hass, config):
     unit_system = 'metric' if hass.config.units.is_metric else 'imperial'
     scan_interval = conf[CONF_SCAN_INTERVAL]
 
-    hass.data[MBDATA] = mb(host, username, password, ssl, unit_system)
+    hass.data[MBDATA] = mb.meteobridge(host, username, password, ssl, unit_system)
     hass.data[CONF_NAME] = name
 
     async def _async_systems_update(now):

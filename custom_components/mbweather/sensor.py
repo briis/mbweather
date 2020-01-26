@@ -103,10 +103,6 @@ class MBWeatherSensor(Entity):
     def state(self):
         """Return the state of the sensor."""
         _LOGGER.debug("Sensor: %s",self._condition)
-        if self._condition == 'condition':
-            if (not 'condition' in self.data):
-                return 'Requires Weather Component'
-
         if self._condition in self.data:
             if not (self._state is None):
                 if SENSOR_TYPES[self._condition][1] == 'm/s':

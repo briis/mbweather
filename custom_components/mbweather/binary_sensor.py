@@ -18,13 +18,13 @@ from homeassistant.components.binary_sensor import (ENTITY_ID_FORMAT,
 from homeassistant.const import (ATTR_ATTRIBUTION, CONF_ENTITY_NAMESPACE,
                                  CONF_MONITORED_CONDITIONS, CONF_NAME)
 from homeassistant.helpers.entity import Entity, generate_entity_id
-from . import ATTRIBUTION, MBDATA
+from . import DEFAULT_ATTRIBUTION, MBDATA, DOMAIN
 
 DEPENDENCIES = ['mbweather']
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = 'mbweather'
+SCAN_INTERVAL = timedelta(seconds=5)
 
 SENSOR_TYPES = {
     'raining': ['Raining', None, 'mdi:water', 'mdi:water-off'],
@@ -44,7 +44,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     name = config.get(CONF_NAME)
     data = hass.data[MBDATA]
 
-    if data.data['time'] is None:
+    if not data:
         return
 
     sensors = []
@@ -59,8 +59,9 @@ class MBweatherBinarySensor(BinarySensorDevice):
 
     def __init__(self, hass, data, condition, name):
         """Initialize the sensor."""
+        self.data = data.sensors
         self._condition = condition
-        self.data = data
+        self._state = self.data[self._condition]
         self._device_class = SENSOR_TYPES[self._condition][1]
         self._name = SENSOR_TYPES[self._condition][0]
         self.entity_id = generate_entity_id(ENTITY_ID_FORMAT, '{} {}'.format('mbw', SENSOR_TYPES[self._condition][0]), hass=hass)
@@ -73,16 +74,12 @@ class MBweatherBinarySensor(BinarySensorDevice):
     @property
     def is_on(self):
         """Return the state of the sensor."""
-        if self._condition in self.data.data:
-            variable = self.data.data[self._condition]
-            if not (variable is None):
-                return variable
-        return None
+        return self._state is True
 
     @property
     def icon(self):
         """Icon to use in the frontend."""
-        return SENSOR_TYPES[self._condition][2] if self.data.data[self._condition] \
+        return SENSOR_TYPES[self._condition][2] if self.data[self._condition] \
             else SENSOR_TYPES[self._condition][3]
 
     @property
@@ -94,9 +91,10 @@ class MBweatherBinarySensor(BinarySensorDevice):
     def device_state_attributes(self):
         """Return the state attributes of the device."""
         attr = {}
-        attr[ATTR_ATTRIBUTION] = ATTRIBUTION
+        attr[ATTR_ATTRIBUTION] = DEFAULT_ATTRIBUTION
         return attr
 
     def update(self):
         """Update current conditions."""
-        self.data.update()
+        self._state = self.data[self._condition]
+

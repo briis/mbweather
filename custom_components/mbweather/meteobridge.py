@@ -8,7 +8,6 @@
 import csv
 import requests
 from datetime import datetime
-
 class meteobridge:
     """Main class to retrieve the data from the Logger."""
 
@@ -77,6 +76,13 @@ class meteobridge:
                 self._isfreezing = True if float(self._outtemp) < 0 else False
                 self._israining = True if float(self._rainrate) > 0 else False
                 self._islowbat = True if float(self._lowbat) > 0 else False
+                if "condition" in self.sensor_data:
+                    if self.sensor_data["condition"] is not None:
+                        self._condition = self.sensor_data["condition"]
+                    else:
+                        self._condition = None
+                else:
+                    self._condition = None
 
             item = {
                 "in_temperature": self._intemp,
@@ -102,7 +108,7 @@ class meteobridge:
                 "freezing": self._isfreezing,
                 "forecast": self._fc,
                 "time": self._timestamp.strftime("%d-%m-%Y %H:%M:%S"),
-                "condition": None
+                "condition": self._condition
             }
             self.sensor_data.update(item)
 

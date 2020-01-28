@@ -144,6 +144,7 @@ Default: All Sensors are displayed
 * **in_temperature** - Temperature meassured by the Meteobridge Logger (indoor)
 * **in_humidity** - Humidity meassured by the Meteobridge Logger (indoor)
 * **condition** - Current condition state. Only supplies data if the `weather` component is activated.
+* **precip_probability** - Precipitation probability for the day. Only supplies data if the `weather` component is activated.
 * **forecast** - A string with the current weather forecast, delivered by the local Weather Station. **Note:** Not all Weather Station will deliver this. I only know of the Davis Weather Stations for now.
 
 ### Weather

@@ -77,6 +77,8 @@ class meteobridge:
                 self._israining = True if float(self._rainrate) > 0 else False
                 self._islowbat = True if float(self._lowbat) > 0 else False
 
+                # Data below is comming from Dark Sky, and is updated by external component. Thus we need to check if available
+                # and don't overwrite values if present.
                 if "condition" in self.sensor_data:
                     if self.sensor_data["condition"] is not None:
                         self._condition = self.sensor_data["condition"]

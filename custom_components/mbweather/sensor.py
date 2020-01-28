@@ -54,6 +54,7 @@ SENSOR_TYPES = {
     'in_humidity': ['Indoor Hum', '%', 'mdi:water-percent', DEVICE_CLASS_HUMIDITY, None],
     'pressure': ['Pressure', 'hPa', 'mdi:gauge', DEVICE_CLASS_PRESSURE, 'inHg'],
     'condition': ['Condition', '', 'mdi:text-short', None, None],
+    'precip_probability': ['Precip Probability', '%', 'mdi:water-percent', None, None],
     'forecast': ['Forecast', '', 'mdi:text-short', None, None]
 }
 

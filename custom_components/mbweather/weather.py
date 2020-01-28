@@ -170,6 +170,11 @@ class DarkSkyWeather(WeatherEntityExt):
         return float(self._curdata['rainrate'])
 
     @property
+    def precip_probability(self):
+        """Return the Precipitation Probability."""
+        return self._ds_currently.get("precipProbability")
+
+    @property
     def ozone(self):
         """Return the ozone level."""
         return self._ds_currently.get("ozone")

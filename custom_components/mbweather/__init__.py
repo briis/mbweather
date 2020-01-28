@@ -40,6 +40,7 @@ ATTR_WEATHER_WIND_BEARING = "wind_bearing"
 ATTR_WEATHER_WIND_SPEED = "wind_speed"
 ATTR_WEATHER_RAINTODAY = "rain_today"
 ATTR_WEATHER_RAINRATE = "rain_rate"
+ATTR_WEATHER_PRECIP_PPROBABILIY = "precip_probability"
 
 DOMAIN = 'mbweather'
 MBDATA = DOMAIN
@@ -144,6 +145,11 @@ class WeatherEntityExt(Entity):
         return None
 
     @property
+    def precip_probability(self):
+        """Return the Precipitation Probability."""
+        return None
+
+    @property
     def forecast(self):
         """Return the forecast."""
         return None
@@ -173,6 +179,10 @@ class WeatherEntityExt(Entity):
         ozone = self.ozone
         if ozone is not None:
             data[ATTR_WEATHER_OZONE] = ozone
+
+        precip_probability = self.precip_probability
+        if precip_probability is not None:
+            data[ATTR_WEATHER_PRECIP_PPROBABILIY] = precip_probability
 
         pressure = self.pressure
         if pressure is not None:

@@ -52,7 +52,7 @@ class meteobridge:
             for values in rows:
                 self._timestamp = datetime.strptime(values[0] + " " + values[1], "%d/%m/%Y %H:%M:%S")
 
-                self._outtemp = values[2]
+                self._outtemp = cnv.temperature(float(values[2]),self._unit_system)
                 self._press = cnv.pressure(float(values[3]),self._unit_system)
                 self._outhum = values[4]
                 self._windspeedavg = cnv.speed(float(values[5]), self._unit_system)
@@ -60,17 +60,17 @@ class meteobridge:
                 self._winddir = cnv.wind_direction(float(values[6]))
                 self._raintoday = cnv.volume(float(values[7]), self._unit_system)
                 self._rainrate = cnv.rate(float(values[8]), self._unit_system)
-                self._outdew = values[9]
-                self._windchill = values[10]
+                self._outdew = cnv.temperature(float(values[9]),self._unit_system)
+                self._windchill = cnv.temperature(float(values[10]),self._unit_system)
                 self._windgust = cnv.speed(float(values[11]), self._unit_system)
                 self._lowbat = values[12]
-                self._intemp = values[13]
+                self._intemp = cnv.temperature(float(values[13]),self._unit_system)
                 self._inhum = values[14]
-                self._temphigh = values[15]
-                self._templow = values[16]
+                self._temphigh = cnv.temperature(float(values[15]),self._unit_system)
+                self._templow = cnv.temperature(float(values[16]),self._unit_system)
                 self._windspeed = cnv.speed(float(values[17]), self._unit_system)
-                self._heatindex = values[18]
-                self._feels_like = cnv.feels_like(self._outtemp,self._heatindex, self._windchill)
+                self._heatindex = cnv.temperature(float(values[18]),self._unit_system)
+                self._feels_like = cnv.feels_like(self._outtemp,self._heatindex, self._windchill, self._unit_system)
                 self._fc = values[19]
 
                 self._isfreezing = True if float(self._outtemp) < 0 else False
@@ -181,14 +181,21 @@ class Conversion:
             # Return value in mi
             return round(value*0.621371192,1)
         else:
-            # Return value in m/s
+            # Return value in km
             return round(value,0)
 
-    def feels_like(self, temp, heatindex, windchill):
+    def feels_like(self, temp, heatindex, windchill, unit):
         """ Return Feels Like Temp."""
-        if (float(temp) > 26.666666667):
+        if unit.lower() == "imperial":
+            high_temp = 80
+            low_temp = 50
+        else:
+            high_temp = 26.666666667
+            low_temp = 10
+
+        if (float(temp) > high_temp):
             return float(heatindex)
-        elif (float(temp) < 10):
+        elif (float(temp) < low_temp):
             return float(windchill)
         else:
             return temp

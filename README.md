@@ -111,6 +111,7 @@ sensor:
       - in_temperature
       - in_humidity
       - condition
+      - precip_probability
       - forecast
 ```
 #### Configuration Variables

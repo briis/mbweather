@@ -28,21 +28,18 @@ from homeassistant.const import (
     CONF_LONGITUDE,
     CONF_MODE,
     CONF_NAME,
-    PRESSURE_HPA,
-    PRESSURE_INHG,
     TEMP_CELSIUS,
     TEMP_FAHRENHEIT,
 )
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
 from homeassistant.util.dt import utc_from_timestamp
-from homeassistant.util.pressure import convert as convert_pressure
 
-from . import MBDATA, DOMAIN, WeatherEntityExt
+from . import MBDATA, WeatherEntityExt
 
 _LOGGER = logging.getLogger(__name__)
 
-DEPENDENCIES = ['mbweather']
+DEPENDENCIES = ["mbweather"]
 
 ATTRIBUTION = "Powered by Dark Sky and local Meteobridge Weather Station"
 
@@ -114,7 +111,6 @@ class DarkSkyWeather(WeatherEntityExt):
         self._curdata = curdata.sensors
         _LOGGER.debug("Curdata: %s", self._curdata)
 
-
     @property
     def available(self):
         """Return if weather data is available from Dark Sky."""
@@ -135,6 +131,7 @@ class DarkSkyWeather(WeatherEntityExt):
         """Return the temperature."""
         return float(self._curdata['temperature'])
 
+
     @property
     def temperature_unit(self):
         """Return the unit of measurement."""
@@ -145,34 +142,37 @@ class DarkSkyWeather(WeatherEntityExt):
     @property
     def humidity(self):
         """Return the humidity."""
-        return int(float(self._curdata['humidity']))
+        return int(float(self._curdata["humidity"]))
 
     @property
     def wind_speed(self):
         """Return the wind speed."""
-        return float(self._curdata['windspeedavg']) if 'us' in self._dark_sky.units \
-            else round(float(self._curdata['windspeedavg']) * 3.6, 1)
+        return (
+            float(self._curdata["windspeedavg"])
+            if "us" in self._dark_sky.units
+            else round(float(self._curdata["windspeedavg"]) * 3.6, 1)
+        )
 
     @property
     def wind_bearing(self):
         """Return the wind bearing."""
-        return float(self._curdata['windbearing'])
+        return float(self._curdata["windbearing"])
 
     @property
     def rain_today(self):
         """Return the accumulated precipitation."""
-        return float(self._curdata['raintoday'])
+        return float(self._curdata["raintoday"])
 
     @property
     def rain_rate(self):
         """Return the current rain rate."""
-        return float(self._curdata['rainrate'])
+        return float(self._curdata["rainrate"])
 
     @property
     def precip_probability(self):
         """Return the Precipitation Probability."""
-        precip_prob = int(float(self._ds_currently.get("precipProbability"))*100)
-        self._curdata['precip_probability'] = precip_prob
+        precip_prob = int(float(self._ds_currently.get("precipProbability")) * 100)
+        self._curdata["precip_probability"] = precip_prob
         return precip_prob
 
     @property
@@ -183,7 +183,7 @@ class DarkSkyWeather(WeatherEntityExt):
     @property
     def pressure(self):
         """Return the pressure."""
-        return round(float(self._curdata['pressure']), 1)
+        return round(float(self._curdata["pressure"]), 1)
 
     @property
     def visibility(self):
@@ -193,7 +193,7 @@ class DarkSkyWeather(WeatherEntityExt):
     @property
     def condition(self):
         """Return the weather condition."""
-        self._curdata['condition'] = MAP_CONDITION.get(self._ds_currently.get("icon"))
+        self._curdata["condition"] = MAP_CONDITION.get(self._ds_currently.get("icon"))
         return MAP_CONDITION.get(self._ds_currently.get("icon"))
 
     @property

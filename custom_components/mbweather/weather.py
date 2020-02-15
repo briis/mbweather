@@ -134,8 +134,6 @@ class DarkSkyWeather(WeatherEntityExt):
     def temperature(self):
         """Return the temperature."""
         return float(self._curdata['temperature'])
-        # return round((float(self._curdata['temperature'])*9/5)+32,1) if 'us' in self._dark_sky.units \
-        #     else float(self._curdata['temperature'])
 
     @property
     def temperature_unit(self):

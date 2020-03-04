@@ -35,7 +35,7 @@ class meteobridge:
     def _get_sensor_data(self):
         """Gets the sensor data from the Meteobridge Logger"""
 
-        dataTemplate = "[DD]/[MM]/[YYYY];[hh]:[mm]:[ss];[th0temp-act:0];[thb0seapress-act:--];[th0hum-act:--];[wind0avgwind-act:--];[wind0dir-avg5.0:--];[rain0total-daysum:--];[rain0rate-act:--];[th0dew-act:--];[wind0chill-act:0];[wind0wind-max1:--];[th0lowbat-act.0:--];[thb0temp-act:--];[thb0hum-act.0:--];[th0temp-dmax:--];[th0temp-dmin:--];[wind0wind-act:--];[th0heatindex-act.1:0];[forecast-text:]"
+        dataTemplate = "[DD]/[MM]/[YYYY];[hh]:[mm]:[ss];[th0temp-act:0];[thb0seapress-act:0];[th0hum-act:0];[wind0avgwind-act:0];[wind0dir-avg5.0:0];[rain0total-daysum:0];[rain0rate-act:0];[th0dew-act:0];[wind0chill-act:0];[wind0wind-max1:0];[th0lowbat-act.0:0];[thb0temp-act:0];[thb0hum-act.0:0];[th0temp-dmax:0];[th0temp-dmin:0];[wind0wind-act:0];[th0heatindex-act.1:0];[forecast-text:]"
         preUrl = "https://"
         if self._ssl != True:
             preUrl = "http://"

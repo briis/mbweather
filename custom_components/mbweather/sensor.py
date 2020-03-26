@@ -110,6 +110,8 @@ SENSOR_TYPES = {
         None,
     ],
     "pressure": ["Pressure", "hPa", "mdi:gauge", DEVICE_CLASS_PRESSURE, "inHg"],
+    "uvindex": ["UV Index", "UVI", "mdi:weather-sunny", None, "UVI"],
+    "solarrad": ["Solar Radiation", "W/m2", "mdi:weather-sunny", None, "W/m2"],
     "condition": ["Condition", "", "mdi:text-short", None, None],
     "precip_probability": ["Precip Probability", "%", "mdi:water-percent", None, None],
     "forecast": ["Forecast", "", "mdi:text-short", None, None],

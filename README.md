@@ -142,6 +142,8 @@ Default: All Sensors are displayed
 * **rainrate** - The current precipitation rate - 0 if it is not raining
 * **humidity** - Current humidity in %
 * **pressure** - Current barometric pressure, taking in to account the position of the station
+* **uvindex** - Current UV Index
+* **solarrad** - Current Solar Radiation meassured in W/m2
 * **in_temperature** - Temperature meassured by the Meteobridge Logger (indoor)
 * **in_humidity** - Humidity meassured by the Meteobridge Logger (indoor)
 * **condition** - Current condition state. Only supplies data if the `weather` component is activated.

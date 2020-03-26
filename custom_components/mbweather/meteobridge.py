@@ -35,7 +35,7 @@ class meteobridge:
     def _get_sensor_data(self):
         """Gets the sensor data from the Meteobridge Logger"""
 
-        dataTemplate = "[DD]/[MM]/[YYYY];[hh]:[mm]:[ss];[th0temp-act:0];[thb0seapress-act:0];[th0hum-act:0];[wind0avgwind-act:0];[wind0dir-avg5.0:0];[rain0total-daysum:0];[rain0rate-act:0];[th0dew-act:0];[wind0chill-act:0];[wind0wind-max1:0];[th0lowbat-act.0:0];[thb0temp-act:0];[thb0hum-act.0:0];[th0temp-dmax:0];[th0temp-dmin:0];[wind0wind-act:0];[th0heatindex-act.1:0];[forecast-text:]"
+        dataTemplate = "[DD]/[MM]/[YYYY];[hh]:[mm]:[ss];[th0temp-act:0];[thb0seapress-act:0];[th0hum-act:0];[wind0avgwind-act:0];[wind0dir-avg5.0:0];[rain0total-daysum:0];[rain0rate-act:0];[th0dew-act:0];[wind0chill-act:0];[wind0wind-max1:0];[th0lowbat-act.0:0];[thb0temp-act:0];[thb0hum-act.0:0];[th0temp-dmax:0];[th0temp-dmin:0];[wind0wind-act:0];[th0heatindex-act.1:0];[uv0index-act:0];[sol0rad-act:0];[forecast-text:]"
         preUrl = "https://"
         if self._ssl != True:
             preUrl = "http://"
@@ -69,9 +69,11 @@ class meteobridge:
                 self._temphigh = cnv.temperature(float(values[15]),self._unit_system)
                 self._templow = cnv.temperature(float(values[16]),self._unit_system)
                 self._windspeed = cnv.speed(float(values[17]), self._unit_system)
-                self._heatindex = cnv.temperature(float(values[18]),self._unit_system)
+                self._heatindex = cnv.temperature(float(values[18]), self._unit_system)
+                self._uvindex = float(values[19])
+                self._solarrad = float(values[20])
                 self._feels_like = cnv.feels_like(self._outtemp,self._heatindex, self._windchill, self._unit_system)
-                self._fc = values[19]
+                self._fc = values[21]
 
                 self._isfreezing = True if float(self._outtemp) < 0 else False
                 self._israining = True if float(self._rainrate) > 0 else False
@@ -114,6 +116,8 @@ class meteobridge:
                 "pressure": self._press,
                 "rainrate": self._rainrate,
                 "raintoday": self._raintoday,
+                "uvindex": self._uvindex,
+                "solarrad": self._solarrad,
                 "lowbattery": self._islowbat,
                 "raining": self._israining,
                 "freezing": self._isfreezing,

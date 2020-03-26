@@ -108,6 +108,8 @@ sensor:
       - rainrate
       - humidity
       - pressure
+      - uvindex
+      - solarrad
       - in_temperature
       - in_humidity
       - condition

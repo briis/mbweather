@@ -62,7 +62,7 @@ MAP_CONDITION = {
 }
 
 CONF_UNITS = "units"
-CONF_LANUGUAGE = "language"
+CONF_LANGUAGE = "language"
 
 DEFAULT_NAME = "MB Weather Dark Sky"
 DEFAULT_LANGUAGE = "en"
@@ -74,7 +74,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_LONGITUDE): cv.longitude,
         vol.Optional(CONF_MODE, default="hourly"): vol.In(FORECAST_MODE),
         vol.Optional(CONF_UNITS): vol.In(["auto", "si", "us", "ca", "uk", "uk2"]),
-        vol.Optional(CONF_LANUGUAGE, default=DEFAULT_LANGUAGE): cv.string,
+        vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): cv.string,
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
     }
 )
@@ -88,7 +88,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     longitude = config.get(CONF_LONGITUDE, hass.config.longitude)
     name = config.get(CONF_NAME)
     mode = config.get(CONF_MODE)
-    language = config.get(CONF_LANUGUAGE)
+    language = config.get(CONF_LANGUAGE)
 
     units = config.get(CONF_UNITS)
     if not units:
@@ -113,7 +113,6 @@ class DarkSkyWeather(WeatherEntityExt):
         self._ds_hourly = None
         self._ds_daily = None
         self._curdata = curdata.sensors
-        _LOGGER.debug("Curdata: %s", self._curdata)
 
     @property
     def available(self):

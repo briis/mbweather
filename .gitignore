@@ -131,3 +131,4 @@ mbweather.code-workspace
 .DS_Store
 custom_components/.DS_Store
 custom_components/mbweather/openweathermap.py
+custom_components/mbweather/data.json

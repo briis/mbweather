@@ -1,21 +1,22 @@
 """Meteobridge Weather Integration for Home Assistant"""
-import xml.etree.ElementTree
 import logging
-import requests
-import csv
 from datetime import timedelta, datetime
 import voluptuous as vol
 
 from homeassistant.const import (TEMP_CELSIUS, CONF_NAME, CONF_HOST, CONF_USERNAME, CONF_PASSWORD, CONF_SCAN_INTERVAL, PRECISION_TENTHS, PRECISION_WHOLE)
 from homeassistant.helpers import config_validation as cv
+from homeassistant import core
 from homeassistant.helpers import discovery
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.temperature import display_temp as show_temp
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
     async_dispatcher_send,
 )
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers import update_coordinator
 
 from . import meteobridge as mb
 
@@ -60,7 +61,7 @@ CONFIG_SCHEMA = vol.Schema({
     }),
 }, extra=vol.ALLOW_EXTRA)
 
-def setup(hass, config):
+async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
     """Set up the MBWeather platform."""
 
     conf = config[DOMAIN]
@@ -71,20 +72,32 @@ def setup(hass, config):
     ssl = conf[CONF_USE_SLL]
     unit_system = 'metric' if hass.config.units.is_metric else 'imperial'
     scan_interval = conf[CONF_SCAN_INTERVAL]
+    session = async_get_clientsession(hass)
 
-    hass.data[MBDATA] = mb.meteobridge(host, username, password, ssl, unit_system)
+    mb_server = mb.Meteobridge(
+        session, host, username, password, ssl, unit_system
+    )
+    _LOGGER.debug("Connected to Meteobridge Platform")
+
+    # hass.data[MBDATA] = mb_server
     hass.data[CONF_NAME] = name
 
-    async def _async_systems_update(now):
-        """Refresh internal state for all systems."""
-        hass.data[MBDATA].update()
-
-        async_dispatcher_send(hass, DOMAIN)
-
-    async_track_time_interval(hass, _async_systems_update, scan_interval)
+    coordinator = DataUpdateCoordinator(
+        hass,
+        _LOGGER,
+        name=DOMAIN,
+        update_method=mb_server.update,
+        update_interval=scan_interval,
+    )
+    
+    # Fetch initial data so we have data when entities subscribe
+    await coordinator.async_refresh()
+    hass.data[MBDATA] = {
+        "coordinator": coordinator,
+        "mb": mb_server,
+    }
 
     return True
-
 
 class WeatherEntityExt(Entity):
     """ABC for weather data. Extended with extra Attributes"""

@@ -25,7 +25,7 @@ DEPENDENCIES = ["mbweather"]
 
 _LOGGER = logging.getLogger(__name__)
 
-SCAN_INTERVAL = timedelta(seconds=5)
+#SCAN_INTERVAL = timedelta(seconds=5)
 
 SENSOR_TYPES = {
     "raining": ["Raining", None, "mdi:water", "mdi:water-off"],
@@ -43,38 +43,37 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
-def setup_platform(hass, config, add_entities, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities, _discovery_info=None):
     """Set up the MBWeather binary sensor platform."""
+    coordinator = hass.data[MBDATA]["coordinator"]
+    if not coordinator.data:
+        return
 
     name = config.get(CONF_NAME)
-    data = hass.data[MBDATA]
-
-    if not data:
-        return
 
     sensors = []
     for variable in config[CONF_MONITORED_CONDITIONS]:
-        sensors.append(MBweatherBinarySensor(hass, data, variable, name))
+        sensors.append(MBweatherBinarySensor(coordinator, variable, name))
         _LOGGER.debug("Binary ensor added: %s", variable)
 
-    add_entities(sensors, True)
+    async_add_entities(sensors, True)
 
 
 class MBweatherBinarySensor(BinarySensorDevice):
     """ Implementation of a MBWeather Binary Sensor. """
 
-    def __init__(self, hass, data, condition, name):
+    def __init__(self, coordinator, condition, name):
         """Initialize the sensor."""
-        self.data = data.sensors
+        self.coordinator = coordinator
         self._condition = condition
-        self._state = self.data[self._condition]
         self._device_class = SENSOR_TYPES[self._condition][1]
         self._name = SENSOR_TYPES[self._condition][0]
-        self.entity_id = generate_entity_id(
-            ENTITY_ID_FORMAT,
-            "{} {}".format("mbw", SENSOR_TYPES[self._condition][0]),
-            hass=hass,
-        )
+        self._unique_id = f"mbw_{self._name.lower().replace(' ', '_')}"
+
+    @property
+    def unique_id(self):
+        """Return a unique ID."""
+        return self._unique_id
 
     @property
     def name(self):
@@ -84,14 +83,14 @@ class MBweatherBinarySensor(BinarySensorDevice):
     @property
     def is_on(self):
         """Return the state of the sensor."""
-        return self._state is True
+        return self.coordinator.data[self._condition] is True
 
     @property
     def icon(self):
         """Icon to use in the frontend."""
         return (
             SENSOR_TYPES[self._condition][2]
-            if self.data[self._condition]
+            if self.coordinator.data[self._condition]
             else SENSOR_TYPES[self._condition][3]
         )
 
@@ -107,7 +106,11 @@ class MBweatherBinarySensor(BinarySensorDevice):
         attr[ATTR_ATTRIBUTION] = DEFAULT_ATTRIBUTION
         return attr
 
-    def update(self):
-        """Update current conditions."""
-        self._state = self.data[self._condition]
+    async def async_added_to_hass(self):
+        """When entity is added to hass."""
+        self.coordinator.async_add_listener(self.async_write_ha_state)
+
+    async def async_will_remove_from_hass(self):
+        """When entity will be removed from hass."""
+        self.coordinator.async_remove_listener(self.async_write_ha_state)
 

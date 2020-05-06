@@ -82,8 +82,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=3)
 
 
-def setup_platform(hass, config, add_entities, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities, _discovery_info=None):
     """Set up the Dark Sky weather."""
+    coordinator = hass.data[MBDATA]["coordinator"]
+    if not coordinator.data:
+        return
+
     latitude = config.get(CONF_LATITUDE, hass.config.latitude)
     longitude = config.get(CONF_LONGITUDE, hass.config.longitude)
     name = config.get(CONF_NAME)
@@ -95,14 +99,13 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         units = "ca" if hass.config.units.is_metric else "us"
 
     dark_sky = DarkSkyData(config.get(CONF_API_KEY), latitude, longitude, language, units)
-    curdata = hass.data[MBDATA]
-    add_entities([DarkSkyWeather(name, dark_sky, mode, curdata)], True)
+    async_add_entities([DarkSkyWeather(name, dark_sky, mode, coordinator)], True)
 
 
 class DarkSkyWeather(WeatherEntityExt):
     """Representation of a weather condition."""
 
-    def __init__(self, name, dark_sky, mode, curdata):
+    def __init__(self, name, dark_sky, mode, coordinator):
         """Initialize Dark Sky weather."""
         self._name = name
         self._dark_sky = dark_sky
@@ -112,7 +115,7 @@ class DarkSkyWeather(WeatherEntityExt):
         self._ds_currently = None
         self._ds_hourly = None
         self._ds_daily = None
-        self._curdata = curdata.sensors
+        self.coordinator = coordinator
 
     @property
     def available(self):
@@ -132,7 +135,7 @@ class DarkSkyWeather(WeatherEntityExt):
     @property
     def temperature(self):
         """Return the temperature."""
-        return float(self._curdata['temperature'])
+        return float(self.coordinator.data['temperature'])
 
 
     @property
@@ -145,7 +148,7 @@ class DarkSkyWeather(WeatherEntityExt):
     @property
     def humidity(self):
         """Return the humidity."""
-        return int(float(self._curdata["humidity"]))
+        return int(float(self.coordinator.data["humidity"]))
 
     @property
     def wind_speed(self):
@@ -153,29 +156,29 @@ class DarkSkyWeather(WeatherEntityExt):
         return (
             float(self._curdata["windspeedavg"])
             if "us" in self._dark_sky.units
-            else round(float(self._curdata["windspeedavg"]) * 3.6, 1)
+            else round(float(self.coordinator.data["windspeedavg"]) * 3.6, 1)
         )
 
     @property
     def wind_bearing(self):
         """Return the wind bearing."""
-        return float(self._curdata["windbearing"])
+        return float(self.coordinator.data["windbearing"])
 
     @property
     def rain_today(self):
         """Return the accumulated precipitation."""
-        return float(self._curdata["raintoday"])
+        return float(self.coordinator.data["raintoday"])
 
     @property
     def rain_rate(self):
         """Return the current rain rate."""
-        return float(self._curdata["rainrate"])
+        return float(self.coordinator.data["rainrate"])
 
     @property
     def precip_probability(self):
         """Return the Precipitation Probability."""
         precip_prob = int(float(self._ds_currently.get("precipProbability")) * 100)
-        self._curdata["precip_probability"] = precip_prob
+        self.coordinator.data["precip_probability"] = precip_prob
         return precip_prob
 
     @property
@@ -186,7 +189,7 @@ class DarkSkyWeather(WeatherEntityExt):
     @property
     def pressure(self):
         """Return the pressure."""
-        return round(float(self._curdata["pressure"]), 1)
+        return round(float(self.coordinator.data["pressure"]), 1)
 
     @property
     def visibility(self):
@@ -196,7 +199,7 @@ class DarkSkyWeather(WeatherEntityExt):
     @property
     def condition(self):
         """Return the weather condition."""
-        self._curdata["condition"] = MAP_CONDITION.get(self._ds_currently.get("icon"))
+        self.coordinator.data["condition"] = MAP_CONDITION.get(self._ds_currently.get("icon"))
         return MAP_CONDITION.get(self._ds_currently.get("icon"))
 
     @property
@@ -257,6 +260,13 @@ class DarkSkyWeather(WeatherEntityExt):
         self._ds_hourly = self._dark_sky.hourly
         self._ds_daily = self._dark_sky.daily
 
+    async def async_added_to_hass(self):
+        """When entity is added to hass."""
+        self.coordinator.async_add_listener(self.async_write_ha_state)
+
+    async def async_will_remove_from_hass(self):
+        """When entity will be removed from hass."""
+        self.coordinator.async_remove_listener(self.async_write_ha_state)
 
 class DarkSkyData:
     """Get the latest data from Dark Sky."""
@@ -284,6 +294,7 @@ class DarkSkyData:
             self.currently = self.data.currently()
             self.hourly = self.data.hourly()
             self.daily = self.data.daily()
+            _LOGGER.debug("FORECAST UPDATED - DarkSky")
         except (ConnectError, HTTPError, Timeout, ValueError) as error:
             _LOGGER.error("Unable to connect to Dark Sky. %s", error)
             self.data = None

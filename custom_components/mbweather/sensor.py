@@ -12,9 +12,9 @@ import voluptuous as vol
 from datetime import timedelta
 
 import homeassistant.helpers.config_validation as cv
-from homeassistant.components.sensor import ENTITY_ID_FORMAT, PLATFORM_SCHEMA
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
+    ATTR_FRIENDLY_NAME,
     CONF_MONITORED_CONDITIONS,
     CONF_NAME,
     DEVICE_CLASS_HUMIDITY,
@@ -23,19 +23,19 @@ from homeassistant.const import (
     TEMP_CELSIUS,
     TEMP_FAHRENHEIT,
 )
-from homeassistant.helpers.entity import Entity, generate_entity_id
+from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
+from homeassistant.helpers.entity import Entity
+from . import MBDATA, DOMAIN, DEFAULT_ATTRIBUTION
 
-from . import DEFAULT_ATTRIBUTION, MBDATA, DOMAIN
+_LOGGER = logging.getLogger(__name__)
 
 DEPENDENCIES = ["mbweather"]
 
-_LOGGER = logging.getLogger(__name__)
+SCAN_INTERVAL = timedelta(seconds=5)
 
 CONF_WIND_UNIT = "wind_unit"
 
 ATTR_UPDATED = "updated"
-
-SCAN_INTERVAL = timedelta(seconds=5)
 
 SENSOR_TYPES = {
     "temperature": [
@@ -128,42 +128,44 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
-def setup_platform(hass, config, add_entities, discovery_info=None):
-    """Set up the SmartWeather sensor platform."""
-    unit_system = "metric" if hass.config.units.is_metric else "imperial"
-
-    name = config.get(CONF_NAME)
-    data = hass.data[MBDATA]
-    wind_unit = config.get(CONF_WIND_UNIT)
-
-    if not data:
+async def async_setup_platform(hass, config, async_add_entities, _discovery_info=None):
+    """Set up the Meteobridge sensor platform."""
+    coordinator = hass.data[MBDATA]["coordinator"]
+    if not coordinator.data:
         return
+
+    unit_system = "metric" if hass.config.units.is_metric else "imperial"
+    name = config.get(CONF_NAME)
+    wind_unit = config.get(CONF_WIND_UNIT)
 
     sensors = []
     for variable in config[CONF_MONITORED_CONDITIONS]:
         sensors.append(
-            MBWeatherSensor(hass, data, variable, name, unit_system, wind_unit)
+            MBWeatherSensor(coordinator, variable, name, unit_system, wind_unit)
         )
 
-    add_entities(sensors, True)
+    async_add_entities(sensors, True)
 
 
 class MBWeatherSensor(Entity):
     """ Implementation of a SmartWeather Weatherflow Current Sensor. """
 
-    def __init__(self, hass, data, condition, name, unit_system, wind_unit):
+    def __init__(self, coordinator, condition, name, unit_system, wind_unit):
         """Initialize the sensor."""
-        self.data = data.sensors
+        self.coordinator = coordinator
         self._condition = condition
         self._unit_system = unit_system
         self._wind_unit = wind_unit
-        self._state = self.data[self._condition]
-        self._name = SENSOR_TYPES[self._condition][0]
-        self.entity_id = generate_entity_id(
-            ENTITY_ID_FORMAT,
-            "{} {}".format("mbw", SENSOR_TYPES[self._condition][0]),
-            hass=hass,
-        )
+        self._state = None
+        # self._state = self.coordinator.data[self._condition]
+        self._name = f"mbw_{SENSOR_TYPES[self._condition][0]}"
+        self._unique_id = f"mbw_{self._name.lower().replace(' ', '_')}"
+        _LOGGER.debug(f"SENSOR: {self._condition} added")
+
+    @property
+    def unique_id(self):
+        """Return a unique ID."""
+        return self._unique_id
 
     @property
     def name(self):
@@ -173,8 +175,9 @@ class MBWeatherSensor(Entity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        if self._condition in self.data:
-            if not (self._state is None):
+        if self._condition in self.coordinator.data:
+            if not (self.coordinator.data[self._condition] is None):
+                self._state = self.coordinator.data[self._condition]
                 if SENSOR_TYPES[self._condition][1] == "m/s":
                     return (
                         round(self._state * 3.6, 1)
@@ -217,10 +220,14 @@ class MBWeatherSensor(Entity):
         """Return the state attributes of the device."""
         attr = {}
         attr[ATTR_ATTRIBUTION] = DEFAULT_ATTRIBUTION
-        attr[ATTR_UPDATED] = self.data["time"]
+        attr[ATTR_UPDATED] = self.coordinator.data["time"]
 
         return attr
 
-    def update(self):
-        """Update current conditions."""
-        self._state = self.data[self._condition]
+    async def async_added_to_hass(self):
+        """When entity is added to hass."""
+        self.coordinator.async_add_listener(self.async_write_ha_state)
+
+    async def async_will_remove_from_hass(self):
+        """When entity will be removed from hass."""
+        self.coordinator.async_remove_listener(self.async_write_ha_state)

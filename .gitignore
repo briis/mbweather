@@ -135,3 +135,4 @@ custom_components/mbweather/data.json
 custom_components/mbweather/__init__org.py
 custom_components/mbweather/binary_sensor_org.py
 custom_components/mbweather/sensor_org.py
+.devcontainer/secrets.yaml

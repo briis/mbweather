@@ -1,0 +1,17 @@
+default_config:
+
+mbweather:
+  host: !secret mbweather_ip
+  username: !secret mbweather_user
+  password: !secret mbweather_pass
+
+binary_sensor:
+  - platform: mbweather
+
+sensor:
+  - platform: mbweather
+
+logger:
+  default: error
+  logs:
+    custom_components.mbweather: debug

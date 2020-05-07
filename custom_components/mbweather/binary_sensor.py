@@ -13,9 +13,8 @@ from datetime import timedelta
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.binary_sensor import (
-    ENTITY_ID_FORMAT,
     PLATFORM_SCHEMA,
-    BinarySensorDevice,
+    BinarySensorEntity,
 )
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_MONITORED_CONDITIONS, CONF_NAME
 from homeassistant.helpers.entity import generate_entity_id
@@ -24,8 +23,6 @@ from . import DEFAULT_ATTRIBUTION, MBDATA, DOMAIN
 DEPENDENCIES = ["mbweather"]
 
 _LOGGER = logging.getLogger(__name__)
-
-#SCAN_INTERVAL = timedelta(seconds=5)
 
 SENSOR_TYPES = {
     "raining": ["Raining", None, "mdi:water", "mdi:water-off"],
@@ -59,7 +56,7 @@ async def async_setup_platform(hass, config, async_add_entities, _discovery_info
     async_add_entities(sensors, True)
 
 
-class MBweatherBinarySensor(BinarySensorDevice):
+class MBweatherBinarySensor(BinarySensorEntity):
     """ Implementation of a MBWeather Binary Sensor. """
 
     def __init__(self, coordinator, condition, name):
@@ -113,4 +110,3 @@ class MBweatherBinarySensor(BinarySensorDevice):
     async def async_will_remove_from_hass(self):
         """When entity will be removed from hass."""
         self.coordinator.async_remove_listener(self.async_write_ha_state)
-

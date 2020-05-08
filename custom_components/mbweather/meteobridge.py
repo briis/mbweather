@@ -10,12 +10,16 @@ import aiohttp
 import logging
 from datetime import datetime
 
+
 class UnexpectedError(Exception):
     """Other error."""
 
     pass
 
+
 _LOGGER = logging.getLogger(__name__)
+
+
 class Meteobridge:
     """Main class to retrieve the data from the Logger."""
 
@@ -26,8 +30,8 @@ class Meteobridge:
         User: str,
         Pass: str,
         unit_system: str,
-        ssl: bool=False,
-        ):
+        ssl: bool = False,
+    ):
         self._host = Host
         self._user = User
         self._pass = Pass
@@ -50,11 +54,18 @@ class Meteobridge:
         if self._ssl != True:
             preUrl = "http://"
 
-        reqUrl = preUrl + self._user + ":" + self._pass + "@" + self._host + "/cgi-bin/template.cgi?template=" + dataTemplate
+        reqUrl = (
+            preUrl
+            + self._user
+            + ":"
+            + self._pass
+            + "@"
+            + self._host
+            + "/cgi-bin/template.cgi?template="
+            + dataTemplate
+        )
 
-        async with self.req.get(
-            reqUrl,
-        ) as response:
+        async with self.req.get(reqUrl,) as response:
             if response.status == 200:
                 content = await response.read()
                 decoded_content = content.decode("utf-8")
@@ -64,29 +75,44 @@ class Meteobridge:
                 cnv = Conversion()
 
                 for values in rows:
-                    self._timestamp = datetime.strptime(values[0] + " " + values[1], "%d/%m/%Y %H:%M:%S")
+                    self._timestamp = datetime.strptime(
+                        values[0] + " " + values[1], "%d/%m/%Y %H:%M:%S"
+                    )
 
-                    self._outtemp = cnv.temperature(float(values[2]),self._unit_system)
-                    self._press = cnv.pressure(float(values[3]),self._unit_system)
+                    self._outtemp = cnv.temperature(float(values[2]), self._unit_system)
+                    self._press = cnv.pressure(float(values[3]), self._unit_system)
                     self._outhum = values[4]
                     self._windspeedavg = cnv.speed(float(values[5]), self._unit_system)
                     self._windbearing = int(float(values[6]))
                     self._winddir = cnv.wind_direction(float(values[6]))
                     self._raintoday = cnv.volume(float(values[7]), self._unit_system)
                     self._rainrate = cnv.rate(float(values[8]), self._unit_system)
-                    self._outdew = cnv.temperature(float(values[9]),self._unit_system)
-                    self._windchill = cnv.temperature(float(values[10]),self._unit_system)
+                    self._outdew = cnv.temperature(float(values[9]), self._unit_system)
+                    self._windchill = cnv.temperature(
+                        float(values[10]), self._unit_system
+                    )
                     self._windgust = cnv.speed(float(values[11]), self._unit_system)
                     self._lowbat = values[12]
-                    self._intemp = cnv.temperature(float(values[13]),self._unit_system)
+                    self._intemp = cnv.temperature(float(values[13]), self._unit_system)
                     self._inhum = values[14]
-                    self._temphigh = cnv.temperature(float(values[15]),self._unit_system)
-                    self._templow = cnv.temperature(float(values[16]),self._unit_system)
+                    self._temphigh = cnv.temperature(
+                        float(values[15]), self._unit_system
+                    )
+                    self._templow = cnv.temperature(
+                        float(values[16]), self._unit_system
+                    )
                     self._windspeed = cnv.speed(float(values[17]), self._unit_system)
-                    self._heatindex = cnv.temperature(float(values[18]), self._unit_system)
+                    self._heatindex = cnv.temperature(
+                        float(values[18]), self._unit_system
+                    )
                     self._uvindex = float(values[19])
                     self._solarrad = float(values[20])
-                    self._feels_like = cnv.feels_like(self._outtemp,self._heatindex, self._windchill, self._unit_system)
+                    self._feels_like = cnv.feels_like(
+                        self._outtemp,
+                        self._heatindex,
+                        self._windchill,
+                        self._unit_system,
+                    )
                     self._fc = values[21]
 
                     self._isfreezing = True if float(self._outtemp) < 0 else False
@@ -105,7 +131,9 @@ class Meteobridge:
 
                     if "precip_probability" in self.sensor_data:
                         if self.sensor_data["precip_probability"] is not None:
-                            self._precip_probability = self.sensor_data["precip_probability"]
+                            self._precip_probability = self.sensor_data[
+                                "precip_probability"
+                            ]
                         else:
                             self._precip_probability = None
                     else:
@@ -138,13 +166,15 @@ class Meteobridge:
                     "forecast": self._fc,
                     "time": self._timestamp.strftime("%d-%m-%Y %H:%M:%S"),
                     "condition": self._condition,
-                    "precip_probability": self._precip_probability
+                    "precip_probability": self._precip_probability,
                 }
                 self.sensor_data.update(item)
             else:
                 raise UnexpectedError(
                     f"Fetching Meteobridge data failed: {response.status} - Reason: {response.reason}"
                 )
+
+
 class Conversion:
 
     """
@@ -160,50 +190,50 @@ class Conversion:
     def temperature(self, value, unit):
         if unit.lower() == "imperial":
             # Return value F
-            return round((value*9/5)+32,1)
+            return round((value * 9 / 5) + 32, 1)
         else:
             # Return value C
-            return round(value,1)
+            return round(value, 1)
 
     def volume(self, value, unit):
         if unit.lower() == "imperial":
             # Return value in
-            return round(value * 0.0393700787,2)
+            return round(value * 0.0393700787, 2)
         else:
             # Return value mm
-            return round(value,1)
+            return round(value, 1)
 
     def rate(self, value, unit):
         if unit.lower() == "imperial":
             # Return value in
-            return round(value * 0.0393700787,2)
+            return round(value * 0.0393700787, 2)
         else:
             # Return value mm
-            return round(value,2)
+            return round(value, 2)
 
     def pressure(self, value, unit):
         if unit.lower() == "imperial":
             # Return value inHg
-            return round(value * 0.0295299801647,3)
+            return round(value * 0.0295299801647, 3)
         else:
             # Return value mb
-            return round(value,1)
+            return round(value, 1)
 
     def speed(self, value, unit):
         if unit.lower() == "imperial":
             # Return value in mi/h
-            return round(value*2.2369362921,1)
+            return round(value * 2.2369362921, 1)
         else:
             # Return value in m/s
-            return round(value,1)
+            return round(value, 1)
 
     def distance(self, value, unit):
         if unit.lower() == "imperial":
             # Return value in mi
-            return round(value*0.621371192,1)
+            return round(value * 0.621371192, 1)
         else:
             # Return value in km
-            return round(value,0)
+            return round(value, 0)
 
     def feels_like(self, temp, heatindex, windchill, unit):
         """ Return Feels Like Temp."""
@@ -214,16 +244,32 @@ class Conversion:
             high_temp = 26.666666667
             low_temp = 10
 
-        if (float(temp) > high_temp):
+        if float(temp) > high_temp:
             return float(heatindex)
-        elif (float(temp) < low_temp):
+        elif float(temp) < low_temp:
             return float(windchill)
         else:
             return temp
 
     def wind_direction(self, bearing):
-        direction_array = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW","N"]
+        direction_array = [
+            "N",
+            "NNE",
+            "NE",
+            "ENE",
+            "E",
+            "ESE",
+            "SE",
+            "SSE",
+            "S",
+            "SSW",
+            "SW",
+            "WSW",
+            "W",
+            "WNW",
+            "NW",
+            "NNW",
+            "N",
+        ]
         direction = direction_array[int((bearing + 11.25) / 22.5)]
         return direction
-
-

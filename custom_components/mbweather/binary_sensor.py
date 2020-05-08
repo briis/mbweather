@@ -14,7 +14,7 @@ import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.binary_sensor import (
     PLATFORM_SCHEMA,
-    BinarySensorEntity,
+    BinarySensorDevice,
 )
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_MONITORED_CONDITIONS, CONF_NAME
 from homeassistant.helpers.entity import generate_entity_id
@@ -56,7 +56,7 @@ async def async_setup_platform(hass, config, async_add_entities, _discovery_info
     async_add_entities(sensors, True)
 
 
-class MBweatherBinarySensor(BinarySensorEntity):
+class MBweatherBinarySensor(BinarySensorDevice):
     """ Implementation of a MBWeather Binary Sensor. """
 
     def __init__(self, coordinator, condition, name):

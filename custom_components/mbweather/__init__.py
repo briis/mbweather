@@ -3,7 +3,16 @@ import logging
 from datetime import timedelta, datetime
 import voluptuous as vol
 
-from homeassistant.const import (TEMP_CELSIUS, CONF_NAME, CONF_HOST, CONF_USERNAME, CONF_PASSWORD, CONF_SCAN_INTERVAL, PRECISION_TENTHS, PRECISION_WHOLE)
+from homeassistant.const import (
+    TEMP_CELSIUS,
+    CONF_NAME,
+    CONF_HOST,
+    CONF_USERNAME,
+    CONF_PASSWORD,
+    CONF_SCAN_INTERVAL,
+    PRECISION_TENTHS,
+    PRECISION_WHOLE,
+)
 from homeassistant.helpers import config_validation as cv
 from homeassistant import core
 from homeassistant.helpers import discovery
@@ -43,23 +52,31 @@ ATTR_WEATHER_RAINTODAY = "rain_today"
 ATTR_WEATHER_RAINRATE = "rain_rate"
 ATTR_WEATHER_PRECIP_PPROBABILIY = "precip_probability"
 
-DOMAIN = 'mbweather'
+DOMAIN = "mbweather"
 MBDATA = DOMAIN
-CONF_USE_SLL = 'use_ssl'
+CONF_USE_SLL = "use_ssl"
 
 DEFAULT_ATTRIBUTION = "Weather data delivered by a Meteobridge powered Weather Station"
 DEFAULT_SCAN_INTERVAL = timedelta(seconds=10)
 
-CONFIG_SCHEMA = vol.Schema({
-    DOMAIN: vol.Schema({
-        vol.Required(CONF_HOST): cv.string,
-        vol.Required(CONF_USERNAME): cv.string,
-        vol.Required(CONF_PASSWORD): cv.string,
-        vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
-        vol.Optional(CONF_USE_SLL, default=False): cv.string,
-        vol.Optional(CONF_NAME, default=DOMAIN): cv.string
-    }),
-}, extra=vol.ALLOW_EXTRA)
+CONFIG_SCHEMA = vol.Schema(
+    {
+        DOMAIN: vol.Schema(
+            {
+                vol.Required(CONF_HOST): cv.string,
+                vol.Required(CONF_USERNAME): cv.string,
+                vol.Required(CONF_PASSWORD): cv.string,
+                vol.Optional(
+                    CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL
+                ): cv.time_period,
+                vol.Optional(CONF_USE_SLL, default=False): cv.string,
+                vol.Optional(CONF_NAME, default=DOMAIN): cv.string,
+            }
+        ),
+    },
+    extra=vol.ALLOW_EXTRA,
+)
+
 
 async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
     """Set up the MBWeather platform."""
@@ -70,13 +87,11 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
     password = conf[CONF_PASSWORD]
     name = conf[CONF_NAME]
     ssl = conf[CONF_USE_SLL]
-    unit_system = 'metric' if hass.config.units.is_metric else 'imperial'
+    unit_system = "metric" if hass.config.units.is_metric else "imperial"
     scan_interval = conf[CONF_SCAN_INTERVAL]
     session = async_get_clientsession(hass)
 
-    mb_server = mb.Meteobridge(
-        session, host, username, password, ssl, unit_system
-    )
+    mb_server = mb.Meteobridge(session, host, username, password, unit_system, ssl)
     _LOGGER.debug("Connected to Meteobridge Platform")
 
     # hass.data[MBDATA] = mb_server
@@ -89,7 +104,7 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
         update_method=mb_server.update,
         update_interval=scan_interval,
     )
-    
+
     # Fetch initial data so we have data when entities subscribe
     await coordinator.async_refresh()
     hass.data[MBDATA] = {
@@ -98,6 +113,7 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
     }
 
     return True
+
 
 class WeatherEntityExt(Entity):
     """ABC for weather data. Extended with extra Attributes"""

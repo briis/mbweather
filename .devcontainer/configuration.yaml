@@ -1,4 +1,5 @@
 default_config:
+cloud:
 
 mbweather:
   host: !secret mbweather_ip

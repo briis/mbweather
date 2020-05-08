@@ -157,10 +157,9 @@ class MBWeatherSensor(Entity):
         self._unit_system = unit_system
         self._wind_unit = wind_unit
         self._state = None
-        # self._state = self.coordinator.data[self._condition]
         self._name = f"mbw_{SENSOR_TYPES[self._condition][0]}"
         self._unique_id = f"mbw_{self._name.lower().replace(' ', '_')}"
-        _LOGGER.debug(f"SENSOR: {self._condition} added")
+        # _LOGGER.debug(f"SENSOR: {self._condition} added")
 
     @property
     def unique_id(self):
@@ -178,6 +177,9 @@ class MBWeatherSensor(Entity):
         if self._condition in self.coordinator.data:
             if not (self.coordinator.data[self._condition] is None):
                 self._state = self.coordinator.data[self._condition]
+                # _LOGGER.debug(
+                #     f"SENSOR: {SENSOR_TYPES[self._condition][0]} with Value: {self._state}"
+                # )
                 if SENSOR_TYPES[self._condition][1] == "m/s":
                     return (
                         round(self._state * 3.6, 1)

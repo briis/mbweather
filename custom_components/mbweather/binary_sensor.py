@@ -13,7 +13,6 @@ from datetime import timedelta
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.binary_sensor import (
-    ENTITY_ID_FORMAT,
     PLATFORM_SCHEMA,
     BinarySensorDevice,
 )
@@ -24,8 +23,6 @@ from . import DEFAULT_ATTRIBUTION, MBDATA, DOMAIN
 DEPENDENCIES = ["mbweather"]
 
 _LOGGER = logging.getLogger(__name__)
-
-#SCAN_INTERVAL = timedelta(seconds=5)
 
 SENSOR_TYPES = {
     "raining": ["Raining", None, "mdi:water", "mdi:water-off"],
@@ -113,4 +110,3 @@ class MBweatherBinarySensor(BinarySensorDevice):
     async def async_will_remove_from_hass(self):
         """When entity will be removed from hass."""
         self.coordinator.async_remove_listener(self.async_write_ha_state)
-

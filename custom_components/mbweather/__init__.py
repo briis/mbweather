@@ -28,6 +28,11 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers import update_coordinator
 
 from . import meteobridge as mb
+from .const import (
+    DOMAIN,
+    DEFAULT_ATTRIBUTION,
+    CONF_USE_SLL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,11 +57,8 @@ ATTR_WEATHER_RAINTODAY = "rain_today"
 ATTR_WEATHER_RAINRATE = "rain_rate"
 ATTR_WEATHER_PRECIP_PPROBABILIY = "precip_probability"
 
-DOMAIN = "mbweather"
 MBDATA = DOMAIN
-CONF_USE_SLL = "use_ssl"
 
-DEFAULT_ATTRIBUTION = "Weather data delivered by a Meteobridge powered Weather Station"
 DEFAULT_SCAN_INTERVAL = timedelta(seconds=10)
 
 CONFIG_SCHEMA = vol.Schema(

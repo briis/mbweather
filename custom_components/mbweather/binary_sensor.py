@@ -17,7 +17,6 @@ from homeassistant.components.binary_sensor import (
     BinarySensorDevice,
 )
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_MONITORED_CONDITIONS, CONF_NAME
-from homeassistant.helpers.entity import async_generate_entity_id
 from homeassistant.util import slugify
 from . import MBDATA
 from .const import (

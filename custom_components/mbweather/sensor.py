@@ -25,11 +25,14 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
+from homeassistant.util import slugify
+
 from . import MBDATA
 from .const import (
     DOMAIN,
     DEFAULT_ATTRIBUTION,
     ENTITY_ID_SENSOR_FORMAT,
+    ENTITY_UNIQUE_ID,
     CONF_WIND_UNIT,
     ATTR_UPDATED,
 )
@@ -184,14 +187,13 @@ async def async_setup_platform(hass, config, async_add_entities, _discovery_info
         return
 
     unit_system = "metric" if hass.config.units.is_metric else "imperial"
-    name = config.get(CONF_NAME)
+    name = slugify(config.get(CONF_NAME))
     wind_unit = config.get(CONF_WIND_UNIT)
 
     sensors = []
-    for variable in config[CONF_MONITORED_CONDITIONS]:
-        sensors.append(
-            MBWeatherSensor(coordinator, variable, name, unit_system, wind_unit)
-        )
+    for sensor in config[CONF_MONITORED_CONDITIONS]:
+        entity = MBWeatherSensor(coordinator, sensor, name, unit_system, wind_unit)
+        sensors.append(entity)
 
     async_add_entities(sensors, True)
 
@@ -199,16 +201,16 @@ async def async_setup_platform(hass, config, async_add_entities, _discovery_info
 class MBWeatherSensor(Entity):
     """ Implementation of a SmartWeather Weatherflow Current Sensor. """
 
-    def __init__(self, coordinator, condition, name, unit_system, wind_unit):
+    def __init__(self, coordinator, sensor, name, unit_system, wind_unit):
         """Initialize the sensor."""
         self.coordinator = coordinator
-        self._condition = condition
+        self._sensor = sensor
         self._unit_system = unit_system
         self._wind_unit = wind_unit
         self._state = None
-        self._name = f"mbw_{SENSOR_TYPES[self._condition][0]}"
-        self._unique_id = f"mbw_{self._name.lower().replace(' ', '_')}"
-        # _LOGGER.debug(f"SENSOR: {self._condition} added")
+        self.entity_id = ENTITY_ID_SENSOR_FORMAT.format(self._sensor)
+        self._name = SENSOR_TYPES[self._sensor][0]
+        self._unique_id = ENTITY_UNIQUE_ID.format(slugify(self._name).replace(" ", "_"))
 
     @property
     def unique_id(self):
@@ -223,13 +225,10 @@ class MBWeatherSensor(Entity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        if self._condition in self.coordinator.data:
-            if not (self.coordinator.data[self._condition] is None):
-                self._state = self.coordinator.data[self._condition]
-                # _LOGGER.debug(
-                #     f"SENSOR: {SENSOR_TYPES[self._condition][0]} with Value: {self._state}"
-                # )
-                if SENSOR_TYPES[self._condition][1] == "m/s":
+        if self._sensor in self.coordinator.data:
+            if not (self.coordinator.data[self._sensor] is None):
+                self._state = self.coordinator.data[self._sensor]
+                if SENSOR_TYPES[self._sensor][1] == "m/s":
                     return (
                         round(self._state * 3.6, 1)
                         if self._wind_unit == "kmh"
@@ -243,28 +242,28 @@ class MBWeatherSensor(Entity):
     def unit_of_measurement(self):
         """Return the unit of measurement."""
         if self._unit_system == "imperial" and not (
-            SENSOR_TYPES[self._condition][4] is None
+            SENSOR_TYPES[self._sensor][4] is None
         ):
-            return SENSOR_TYPES[self._condition][4]
+            return SENSOR_TYPES[self._sensor][4]
         else:
-            if SENSOR_TYPES[self._condition][1] == "m/s":
+            if SENSOR_TYPES[self._sensor][1] == "m/s":
                 return (
                     "km/h"
                     if self._wind_unit == "kmh"
-                    else SENSOR_TYPES[self._condition][1]
+                    else SENSOR_TYPES[self._sensor][1]
                 )
             else:
-                return SENSOR_TYPES[self._condition][1]
+                return SENSOR_TYPES[self._sensor][1]
 
     @property
     def icon(self):
         """Icon to use in the frontend."""
-        return SENSOR_TYPES[self._condition][2]
+        return SENSOR_TYPES[self._sensor][2]
 
     @property
     def device_class(self):
         """Return the device class of the sensor."""
-        return SENSOR_TYPES[self._condition][3]
+        return SENSOR_TYPES[self._sensor][3]
 
     @property
     def device_state_attributes(self):

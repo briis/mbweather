@@ -17,12 +17,14 @@ from homeassistant.components.binary_sensor import (
     BinarySensorDevice,
 )
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_MONITORED_CONDITIONS, CONF_NAME
-from homeassistant.helpers.entity import generate_entity_id
+from homeassistant.helpers.entity import async_generate_entity_id
+from homeassistant.util import slugify
 from . import MBDATA
 from .const import (
     DOMAIN,
     DEFAULT_ATTRIBUTION,
     ENTITY_ID_BINARY_SENSOR_FORMAT,
+    ENTITY_UNIQUE_ID,
 )
 
 DEPENDENCIES = ["mbweather"]
@@ -51,7 +53,7 @@ async def async_setup_platform(hass, config, async_add_entities, _discovery_info
     if not coordinator.data:
         return
 
-    name = config.get(CONF_NAME)
+    name = slugify(config.get(CONF_NAME))
 
     sensors = []
     for sensor in config[CONF_MONITORED_CONDITIONS]:
@@ -69,8 +71,9 @@ class MBweatherBinarySensor(BinarySensorDevice):
         self.coordinator = coordinator
         self._sensor = sensor
         self._device_class = SENSOR_TYPES[self._sensor][1]
+        self.entity_id = ENTITY_ID_BINARY_SENSOR_FORMAT.format(self._sensor)
         self._name = SENSOR_TYPES[self._sensor][0]
-        self._unique_id = f"mbw_{self._name.lower().replace(' ', '_')}"
+        self._unique_id = ENTITY_UNIQUE_ID.format(slugify(self._name).replace(" ", "_"))
 
     @property
     def unique_id(self):

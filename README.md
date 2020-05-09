@@ -165,11 +165,11 @@ Default: All Sensors are displayed
 * **temp_ymin** - Current year minimum outdoor temperature
 * **temp_ymax** - Current year maximum outdoor temperature
 * **windspeed_mmax** - Current month maximum wind speed
-* **windspeed_ymax** - Current year minimum wind speed
+* **windspeed_ymax** - Current year maximum wind speed
 * **rain_mmax** - Current month accumulated rain
 * **rain_ymax** - Current year accumulated rain
 * **rainrate_mmax** - Current month maximum rain rate
-* **rainrate_ymax** - Current year minimum rain rate
+* **rainrate_ymax** - Current year maximum rain rate
 * **forecast** - A string with the current weather forecast, delivered by the local Weather Station. **Note:** Not all Weather Station will deliver this. I only know of the Davis Weather Stations for now.
 
 ### Weather

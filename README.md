@@ -114,6 +114,16 @@ sensor:
       - in_humidity
       - condition
       - precip_probability
+      - temp_mmin
+      - temp_mmax
+      - temp_ymin
+      - temp_ymax
+      - windspeed_mmax
+      - windspeed_ymax
+      - rain_mmax
+      - rain_ymax
+      - rainrate_mmax
+      - rainrate_ymax
       - forecast
 ```
 #### Configuration Variables
@@ -150,6 +160,16 @@ Default: All Sensors are displayed
 * **in_humidity** - Humidity meassured by the Meteobridge Logger (indoor)
 * **condition** - Current condition state. Only supplies data if the `weather` component is activated.
 * **precip_probability** - Precipitation probability for the day. Only supplies data if the `weather` component is activated.
+* **temp_mmin** - Current month minimum outdoor temperature
+* **temp_mmax** - Current month maximum outdoor temperature
+* **temp_ymin** - Current year minimum outdoor temperature
+* **temp_ymax** - Current year maximum outdoor temperature
+* **windspeed_mmax** - Current month maximum wind speed
+* **windspeed_ymax** - Current year maximum wind speed
+* **rain_mmax** - Current month accumulated rain
+* **rain_ymax** - Current year accumulated rain
+* **rainrate_mmax** - Current month maximum rain rate
+* **rainrate_ymax** - Current year maximum rain rate
 * **forecast** - A string with the current weather forecast, delivered by the local Weather Station. **Note:** Not all Weather Station will deliver this. I only know of the Davis Weather Stations for now.
 
 ### Weather

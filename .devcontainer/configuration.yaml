@@ -12,6 +12,12 @@ binary_sensor:
 sensor:
   - platform: mbweather
 
+weather:
+  - platform: mbweather
+    api_key: !secret ds_api_key
+    mode: daily
+    name: Vindinge
+
 logger:
   default: error
   logs:

@@ -33,9 +33,14 @@ from homeassistant.const import (
 )
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
+from homeassistant.util import slugify
 from homeassistant.util.dt import utc_from_timestamp
 
 from . import MBDATA, WeatherEntityExt
+from .const import (
+    ENTITY_ID_WEATHER_FORMAT,
+    ENTITY_UNIQUE_ID,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -98,7 +103,9 @@ async def async_setup_platform(hass, config, async_add_entities, _discovery_info
     if not units:
         units = "ca" if hass.config.units.is_metric else "us"
 
-    dark_sky = DarkSkyData(config.get(CONF_API_KEY), latitude, longitude, language, units)
+    dark_sky = DarkSkyData(
+        config.get(CONF_API_KEY), latitude, longitude, language, units
+    )
     async_add_entities([DarkSkyWeather(name, dark_sky, mode, coordinator)], True)
 
 
@@ -116,6 +123,10 @@ class DarkSkyWeather(WeatherEntityExt):
         self._ds_hourly = None
         self._ds_daily = None
         self.coordinator = coordinator
+        self.entity_id = ENTITY_ID_WEATHER_FORMAT.format(
+            slugify(self._name).replace(" ", "_")
+        )
+        self._unique_id = ENTITY_UNIQUE_ID.format(slugify(self._name).replace(" ", "_"))
 
     @property
     def available(self):
@@ -135,8 +146,7 @@ class DarkSkyWeather(WeatherEntityExt):
     @property
     def temperature(self):
         """Return the temperature."""
-        return float(self.coordinator.data['temperature'])
-
+        return float(self.coordinator.data["temperature"])
 
     @property
     def temperature_unit(self):
@@ -154,7 +164,7 @@ class DarkSkyWeather(WeatherEntityExt):
     def wind_speed(self):
         """Return the wind speed."""
         return (
-            float(self._curdata["windspeedavg"])
+            float(self.coordinator.data["windspeedavg"])
             if "us" in self._dark_sky.units
             else round(float(self.coordinator.data["windspeedavg"]) * 3.6, 1)
         )
@@ -199,7 +209,9 @@ class DarkSkyWeather(WeatherEntityExt):
     @property
     def condition(self):
         """Return the weather condition."""
-        self.coordinator.data["condition"] = MAP_CONDITION.get(self._ds_currently.get("icon"))
+        self.coordinator.data["condition"] = MAP_CONDITION.get(
+            self._ds_currently.get("icon")
+        )
         return MAP_CONDITION.get(self._ds_currently.get("icon"))
 
     @property
@@ -268,6 +280,7 @@ class DarkSkyWeather(WeatherEntityExt):
         """When entity will be removed from hass."""
         self.coordinator.async_remove_listener(self.async_write_ha_state)
 
+
 class DarkSkyData:
     """Get the latest data from Dark Sky."""
 
@@ -289,7 +302,11 @@ class DarkSkyData:
         """Get the latest data from Dark Sky."""
         try:
             self.data = forecastio.load_forecast(
-                self._api_key, self.latitude, self.longitude, lang=self.language, units=self.requested_units
+                self._api_key,
+                self.latitude,
+                self.longitude,
+                lang=self.language,
+                units=self.requested_units,
             )
             self.currently = self.data.currently()
             self.hourly = self.data.hourly()

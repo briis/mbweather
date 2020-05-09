@@ -17,8 +17,15 @@ from homeassistant.components.binary_sensor import (
     BinarySensorDevice,
 )
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_MONITORED_CONDITIONS, CONF_NAME
-from homeassistant.helpers.entity import generate_entity_id
-from . import DEFAULT_ATTRIBUTION, MBDATA, DOMAIN
+from homeassistant.helpers.entity import async_generate_entity_id
+from homeassistant.util import slugify
+from . import MBDATA
+from .const import (
+    DOMAIN,
+    DEFAULT_ATTRIBUTION,
+    ENTITY_ID_BINARY_SENSOR_FORMAT,
+    ENTITY_UNIQUE_ID,
+)
 
 DEPENDENCIES = ["mbweather"]
 
@@ -46,12 +53,12 @@ async def async_setup_platform(hass, config, async_add_entities, _discovery_info
     if not coordinator.data:
         return
 
-    name = config.get(CONF_NAME)
+    name = slugify(config.get(CONF_NAME))
 
     sensors = []
-    for variable in config[CONF_MONITORED_CONDITIONS]:
-        sensors.append(MBweatherBinarySensor(coordinator, variable, name))
-        _LOGGER.debug("Binary ensor added: %s", variable)
+    for sensor in config[CONF_MONITORED_CONDITIONS]:
+        sensors.append(MBweatherBinarySensor(coordinator, sensor, name))
+        _LOGGER.debug("Binary ensor added: %s", sensor)
 
     async_add_entities(sensors, True)
 
@@ -59,13 +66,14 @@ async def async_setup_platform(hass, config, async_add_entities, _discovery_info
 class MBweatherBinarySensor(BinarySensorDevice):
     """ Implementation of a MBWeather Binary Sensor. """
 
-    def __init__(self, coordinator, condition, name):
+    def __init__(self, coordinator, sensor, name):
         """Initialize the sensor."""
         self.coordinator = coordinator
-        self._condition = condition
-        self._device_class = SENSOR_TYPES[self._condition][1]
-        self._name = SENSOR_TYPES[self._condition][0]
-        self._unique_id = f"mbw_{self._name.lower().replace(' ', '_')}"
+        self._sensor = sensor
+        self._device_class = SENSOR_TYPES[self._sensor][1]
+        self.entity_id = ENTITY_ID_BINARY_SENSOR_FORMAT.format(self._sensor)
+        self._name = SENSOR_TYPES[self._sensor][0]
+        self._unique_id = ENTITY_UNIQUE_ID.format(slugify(self._name).replace(" ", "_"))
 
     @property
     def unique_id(self):
@@ -80,21 +88,21 @@ class MBweatherBinarySensor(BinarySensorDevice):
     @property
     def is_on(self):
         """Return the state of the sensor."""
-        return self.coordinator.data[self._condition] is True
+        return self.coordinator.data[self._sensor] is True
 
     @property
     def icon(self):
         """Icon to use in the frontend."""
         return (
-            SENSOR_TYPES[self._condition][2]
-            if self.coordinator.data[self._condition]
-            else SENSOR_TYPES[self._condition][3]
+            SENSOR_TYPES[self._sensor][2]
+            if self.coordinator.data[self._sensor]
+            else SENSOR_TYPES[self._sensor][3]
         )
 
     @property
     def device_class(self):
         """Return the device class of the sensor."""
-        return SENSOR_TYPES[self._condition][1]
+        return SENSOR_TYPES[self._sensor][1]
 
     @property
     def device_state_attributes(self):

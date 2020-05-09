@@ -49,7 +49,7 @@ class Meteobridge:
     async def _get_sensor_data(self) -> None:
         """Gets the sensor data from the Meteobridge Logger"""
 
-        dataTemplate = "[DD]/[MM]/[YYYY];[hh]:[mm]:[ss];[th0temp-act:0];[thb0seapress-act:0];[th0hum-act:0];[wind0avgwind-act:0];[wind0dir-avg5.0:0];[rain0total-daysum:0];[rain0rate-act:0];[th0dew-act:0];[wind0chill-act:0];[wind0wind-max1:0];[th0lowbat-act.0:0];[thb0temp-act:0];[thb0hum-act.0:0];[th0temp-dmax:0];[th0temp-dmin:0];[wind0wind-act:0];[th0heatindex-act.1:0];[uv0index-act:0];[sol0rad-act:0];[forecast-text:]"
+        dataTemplate = "[DD]/[MM]/[YYYY];[hh]:[mm]:[ss];[th0temp-act:0];[thb0seapress-act:0];[th0hum-act:0];[wind0avgwind-act:0];[wind0dir-avg5.0:0];[rain0total-daysum:0];[rain0rate-act:0];[th0dew-act:0];[wind0chill-act:0];[wind0wind-max1:0];[th0lowbat-act.0:0];[thb0temp-act:0];[thb0hum-act.0:0];[th0temp-dmax:0];[th0temp-dmin:0];[wind0wind-act:0];[th0heatindex-act.1:0];[uv0index-act:0];[sol0rad-act:0];[th0temp-mmin.1:0];[th0temp-mmax.1:0];[th0temp-ymin.1:0];[th0temp-ymax.1:0];[wind0wind-mmax.1:0];[wind0wind-ymax.1:0];[rain0total-mmax.1:0];[rain0total-ymax.1:0];[rain0rate-mmax.1:0];[rain0rate-ymax.1:0];[forecast-text:]"
         preUrl = "https://"
         if self._ssl != True:
             preUrl = "http://"
@@ -113,7 +113,29 @@ class Meteobridge:
                         self._windchill,
                         self._unit_system,
                     )
-                    self._fc = values[21]
+                    self._tempmmin = cnv.temperature(
+                        float(values[21]), self._unit_system
+                    )
+                    self._tempmmax = cnv.temperature(
+                        float(values[22]), self._unit_system
+                    )
+                    self._tempymin = cnv.temperature(
+                        float(values[23]), self._unit_system
+                    )
+                    self._tempymax = cnv.temperature(
+                        float(values[24]), self._unit_system
+                    )
+                    self._windmmax = cnv.speed(float(values[25]), self._unit_system)
+                    self._windymax = cnv.speed(float(values[26]), self._unit_system)
+                    self._rainmmax = cnv.volume(float(values[27]), self._unit_system)
+                    self._rainymax = cnv.volume(float(values[28]), self._unit_system)
+                    self._rainratemmax = cnv.volume(
+                        float(values[29]), self._unit_system
+                    )
+                    self._rainrateymax = cnv.volume(
+                        float(values[30]), self._unit_system
+                    )
+                    self._fc = values[31]
 
                     self._isfreezing = True if float(self._outtemp) < 0 else False
                     self._israining = True if float(self._rainrate) > 0 else False
@@ -167,6 +189,16 @@ class Meteobridge:
                     "time": self._timestamp.strftime("%d-%m-%Y %H:%M:%S"),
                     "condition": self._condition,
                     "precip_probability": self._precip_probability,
+                    "temp_mmin": self._tempmmin,
+                    "temp_mmax": self._tempmmax,
+                    "temp_ymin": self._tempymin,
+                    "temp_ymax": self._tempymax,
+                    "windspeed_mmax": self._windmmax,
+                    "windspeed_ymax": self._windymax,
+                    "rain_mmax": self._rainmmax,
+                    "rain_ymax": self._rainymax,
+                    "rainrate_mmax": self._rainratemmax,
+                    "rainrate_ymax": self._rainrateymax,
                 }
                 self.sensor_data.update(item)
             else:

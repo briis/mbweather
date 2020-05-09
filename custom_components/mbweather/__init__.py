@@ -94,7 +94,6 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
     mb_server = mb.Meteobridge(session, host, username, password, unit_system, ssl)
     _LOGGER.debug("Connected to Meteobridge Platform")
 
-    # hass.data[MBDATA] = mb_server
     hass.data[CONF_NAME] = name
 
     coordinator = DataUpdateCoordinator(

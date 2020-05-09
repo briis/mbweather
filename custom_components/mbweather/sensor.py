@@ -25,17 +25,20 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
-from . import MBDATA, DOMAIN, DEFAULT_ATTRIBUTION
+from . import MBDATA
+from .const import (
+    DOMAIN,
+    DEFAULT_ATTRIBUTION,
+    ENTITY_ID_SENSOR_FORMAT,
+    CONF_WIND_UNIT,
+    ATTR_UPDATED,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
 DEPENDENCIES = ["mbweather"]
 
 SCAN_INTERVAL = timedelta(seconds=5)
-
-CONF_WIND_UNIT = "wind_unit"
-
-ATTR_UPDATED = "updated"
 
 SENSOR_TYPES = {
     "temperature": [
@@ -115,6 +118,52 @@ SENSOR_TYPES = {
     "condition": ["Condition", "", "mdi:text-short", None, None],
     "precip_probability": ["Precip Probability", "%", "mdi:water-percent", None, None],
     "forecast": ["Forecast", "", "mdi:text-short", None, None],
+    "temp_mmin": [
+        "Temp Month Min",
+        TEMP_CELSIUS,
+        "mdi:thermometer",
+        DEVICE_CLASS_TEMPERATURE,
+        TEMP_FAHRENHEIT,
+    ],
+    "temp_mmax": [
+        "Temp Month Max",
+        TEMP_CELSIUS,
+        "mdi:thermometer",
+        DEVICE_CLASS_TEMPERATURE,
+        TEMP_FAHRENHEIT,
+    ],
+    "temp_ymin": [
+        "Temp Year Min",
+        TEMP_CELSIUS,
+        "mdi:thermometer",
+        DEVICE_CLASS_TEMPERATURE,
+        TEMP_FAHRENHEIT,
+    ],
+    "temp_ymax": [
+        "Temp Year Max",
+        TEMP_CELSIUS,
+        "mdi:thermometer",
+        DEVICE_CLASS_TEMPERATURE,
+        TEMP_FAHRENHEIT,
+    ],
+    "windspeed_mmax": ["Wind Speed Month Max", "m/s", "mdi:weather-windy", None, "mph"],
+    "windspeed_ymax": ["Wind Speed Year Max", "m/s", "mdi:weather-windy", None, "mph"],
+    "rain_mmax": ["Rain Month Total", "mm", "mdi:weather-rainy", None, "in"],
+    "rain_ymax": ["Rain Year Total", "mm", "mdi:weather-rainy", None, "in"],
+    "rainrate_mmax": [
+        "Rain rate Month Max",
+        "mm/h",
+        "mdi:weather-pouring",
+        None,
+        "in/h",
+    ],
+    "rainrate_ymax": [
+        "Rain rate Year Max",
+        "mm/h",
+        "mdi:weather-pouring",
+        None,
+        "in/h",
+    ],
 }
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(

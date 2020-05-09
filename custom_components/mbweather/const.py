@@ -12,6 +12,9 @@ ENTITY_ID_BINARY_SENSOR_FORMAT = BINARY_SENSOR_DOMAIN + ".mbw_{}"
 ENTITY_ID_WEATHER_FORMAT = WEATHER_DOMAIN + ".mbw_{}"
 
 CONF_USE_SLL = "use_ssl"
+CONF_WIND_UNIT = "wind_unit"
+
+ATTR_UPDATED = "updated"
 
 DEFAULT_ATTRIBUTION = "Weather data delivered by a Meteobridge powered Weather Station"
 

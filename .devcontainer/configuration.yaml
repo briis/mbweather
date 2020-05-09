@@ -14,7 +14,7 @@ sensor:
 
 weather:
   - platform: mbweather
-    api_key: 753ba3e433efaca0a83c299828153bb4
+    api_key: !secret ds_api_key
     mode: daily
     name: Vindinge
 

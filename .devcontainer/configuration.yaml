@@ -12,6 +12,12 @@ binary_sensor:
 sensor:
   - platform: mbweather
 
+weather:
+  - platform: mbweather
+    api_key: 753ba3e433efaca0a83c299828153bb4
+    mode: daily
+    name: Vindinge
+
 logger:
   default: error
   logs:

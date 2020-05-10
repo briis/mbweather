@@ -8,14 +8,11 @@
     Author: Bjarne Riis
 """
 import logging
-import voluptuous as vol
-from datetime import timedelta
-
-import homeassistant.helpers.config_validation as cv
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.util import slugify
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
-    ATTR_FRIENDLY_NAME,
-    CONF_MONITORED_CONDITIONS,
     CONF_NAME,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_PRESSURE,
@@ -23,9 +20,7 @@ from homeassistant.const import (
     TEMP_CELSIUS,
     TEMP_FAHRENHEIT,
 )
-from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
-from homeassistant.util import slugify
 
 from . import MBDATA
 from .const import (
@@ -38,10 +33,6 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-DEPENDENCIES = ["mbweather"]
-
-SCAN_INTERVAL = timedelta(seconds=5)
 
 SENSOR_TYPES = {
     "temperature": [
@@ -118,8 +109,6 @@ SENSOR_TYPES = {
     "pressure": ["Pressure", "hPa", "mdi:gauge", DEVICE_CLASS_PRESSURE, "inHg"],
     "uvindex": ["UV Index", "UVI", "mdi:weather-sunny-alert", None, "UVI"],
     "solarrad": ["Solar Radiation", "W/m2", "mdi:weather-sunny", None, "W/m2"],
-    "condition": ["Condition", "", "mdi:text-short", None, None],
-    "precip_probability": ["Precip Probability", "%", "mdi:water-percent", None, None],
     "forecast": ["Forecast", "", "mdi:text-short", None, None],
     "temp_mmin": [
         "Temp Month Min",
@@ -169,36 +158,30 @@ SENSOR_TYPES = {
     ],
 }
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_MONITORED_CONDITIONS, default=list(SENSOR_TYPES)): vol.All(
-            cv.ensure_list, [vol.In(SENSOR_TYPES)]
-        ),
-        vol.Optional(CONF_WIND_UNIT, default="ms"): cv.string,
-        vol.Optional(CONF_NAME, default=DOMAIN): cv.string,
-    }
-)
 
-
-async def async_setup_platform(hass, config, async_add_entities, _discovery_info=None):
+async def async_setup_entry(
+    hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities
+) -> bool:
     """Set up the Meteobridge sensor platform."""
     coordinator = hass.data[MBDATA]["coordinator"]
     if not coordinator.data:
         return
 
     unit_system = "metric" if hass.config.units.is_metric else "imperial"
-    name = slugify(config.get(CONF_NAME))
-    wind_unit = config.get(CONF_WIND_UNIT)
+    name = slugify(hass.data[CONF_NAME])
+    wind_unit = "m/s"
 
     sensors = []
-    for sensor in config[CONF_MONITORED_CONDITIONS]:
-        entity = MBWeatherSensor(coordinator, sensor, name, unit_system, wind_unit)
-        sensors.append(entity)
+    for sensor in SENSOR_TYPES:
+        sensors.append(
+            MeteobridgeSensor(coordinator, sensor, name, unit_system, wind_unit)
+        )
+        _LOGGER.debug(f"SENSOR ADDED: {sensor}")
 
     async_add_entities(sensors, True)
 
 
-class MBWeatherSensor(Entity):
+class MeteobridgeSensor(Entity):
     """ Implementation of a SmartWeather Weatherflow Current Sensor. """
 
     def __init__(self, coordinator, sensor, name, unit_system, wind_unit):

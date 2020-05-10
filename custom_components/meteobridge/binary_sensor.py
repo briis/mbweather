@@ -10,14 +10,11 @@
 import logging
 from datetime import timedelta
 
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
-from homeassistant.components.binary_sensor import (
-    PLATFORM_SCHEMA,
-    BinarySensorDevice,
-)
-from homeassistant.const import ATTR_ATTRIBUTION, CONF_MONITORED_CONDITIONS, CONF_NAME
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.util import slugify
+from homeassistant.components.binary_sensor import BinarySensorDevice
 from . import MBDATA
 from .const import (
     DOMAIN,
@@ -25,8 +22,6 @@ from .const import (
     ENTITY_ID_BINARY_SENSOR_FORMAT,
     ENTITY_UNIQUE_ID,
 )
-
-DEPENDENCIES = ["mbweather"]
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,33 +31,26 @@ SENSOR_TYPES = {
     "freezing": ["Freezing", None, "mdi:thermometer-minus", "mdi:thermometer-plus"],
 }
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_MONITORED_CONDITIONS, default=list(SENSOR_TYPES)): vol.All(
-            cv.ensure_list, [vol.In(SENSOR_TYPES)]
-        ),
-        vol.Optional(CONF_NAME, default=DOMAIN): cv.string,
-    }
-)
 
-
-async def async_setup_platform(hass, config, async_add_entities, _discovery_info=None):
-    """Set up the MBWeather binary sensor platform."""
+async def async_setup_entry(
+    hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities
+) -> bool:
+    """Add binary sensors for Meteobridge"""
     coordinator = hass.data[MBDATA]["coordinator"]
     if not coordinator.data:
         return
 
-    name = slugify(config.get(CONF_NAME))
+    name = slugify(hass.data[CONF_NAME])
 
     sensors = []
-    for sensor in config[CONF_MONITORED_CONDITIONS]:
-        sensors.append(MBweatherBinarySensor(coordinator, sensor, name))
-        _LOGGER.debug("Binary ensor added: %s", sensor)
+    for sensor in SENSOR_TYPES:
+        sensors.append(MeteobridgeBinarySensor(coordinator, sensor, name))
+        _LOGGER.debug(f"BINARY SENSOR ADDED: {sensor}")
 
     async_add_entities(sensors, True)
 
 
-class MBweatherBinarySensor(BinarySensorDevice):
+class MeteobridgeBinarySensor(BinarySensorDevice):
     """ Implementation of a MBWeather Binary Sensor. """
 
     def __init__(self, coordinator, sensor, name):

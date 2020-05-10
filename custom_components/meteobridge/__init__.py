@@ -4,20 +4,15 @@ from datetime import timedelta, datetime
 import voluptuous as vol
 
 from homeassistant.const import (
-    TEMP_CELSIUS,
     CONF_NAME,
     CONF_HOST,
     CONF_USERNAME,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
-    PRECISION_TENTHS,
-    PRECISION_WHOLE,
 )
-from homeassistant.helpers import config_validation as cv
-from homeassistant import core
-from homeassistant.helpers import discovery
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.temperature import display_temp as show_temp
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import Config, HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.dispatcher import (
@@ -27,83 +22,50 @@ from homeassistant.helpers.dispatcher import (
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers import update_coordinator
 
-from . import meteobridge as mb
+from .config_flow import meteobridge_hosts
+from .meteobridge import Meteobridge, UnexpectedError
 from .const import (
     DOMAIN,
     DEFAULT_ATTRIBUTION,
-    CONF_USE_SLL,
+    METEOBRIDGE_PLATFORMS,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-ATTR_CONDITION_CLASS = "condition_class"
-ATTR_FORECAST = "forecast"
-ATTR_FORECAST_CONDITION = "condition"
-ATTR_FORECAST_PRECIPITATION = "precipitation"
-ATTR_FORECAST_TEMP = "temperature"
-ATTR_FORECAST_TEMP_LOW = "templow"
-ATTR_FORECAST_TIME = "datetime"
-ATTR_FORECAST_WIND_BEARING = "wind_bearing"
-ATTR_FORECAST_WIND_SPEED = "wind_speed"
-ATTR_WEATHER_ATTRIBUTION = "attribution"
-ATTR_WEATHER_HUMIDITY = "humidity"
-ATTR_WEATHER_OZONE = "ozone"
-ATTR_WEATHER_PRESSURE = "pressure"
-ATTR_WEATHER_TEMPERATURE = "temperature"
-ATTR_WEATHER_VISIBILITY = "visibility"
-ATTR_WEATHER_WIND_BEARING = "wind_bearing"
-ATTR_WEATHER_WIND_SPEED = "wind_speed"
-ATTR_WEATHER_RAINTODAY = "rain_today"
-ATTR_WEATHER_RAINRATE = "rain_rate"
-ATTR_WEATHER_PRECIP_PPROBABILIY = "precip_probability"
 
 MBDATA = DOMAIN
 
 DEFAULT_SCAN_INTERVAL = timedelta(seconds=10)
 
-CONFIG_SCHEMA = vol.Schema(
-    {
-        DOMAIN: vol.Schema(
-            {
-                vol.Required(CONF_HOST): cv.string,
-                vol.Required(CONF_USERNAME): cv.string,
-                vol.Required(CONF_PASSWORD): cv.string,
-                vol.Optional(
-                    CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL
-                ): cv.time_period,
-                vol.Optional(CONF_USE_SLL, default=False): cv.string,
-                vol.Optional(CONF_NAME, default=DOMAIN): cv.string,
-            }
-        ),
-    },
-    extra=vol.ALLOW_EXTRA,
-)
+
+async def async_setup(hass: HomeAssistant, config: Config) -> bool:
+    """Set up configured Meteobridge."""
+    # We allow setup only through config flow type of config
+    return True
 
 
-async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
-    """Set up the MBWeather platform."""
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Set up Meteobridge platforms as config entry."""
 
-    conf = config[DOMAIN]
-    host = conf[CONF_HOST]
-    username = conf[CONF_USERNAME]
-    password = conf[CONF_PASSWORD]
-    name = conf[CONF_NAME]
-    ssl = conf[CONF_USE_SLL]
     unit_system = "metric" if hass.config.units.is_metric else "imperial"
-    scan_interval = conf[CONF_SCAN_INTERVAL]
     session = async_get_clientsession(hass)
 
-    mb_server = mb.Meteobridge(session, host, username, password, unit_system, ssl)
+    mb_server = Meteobridge(
+        session,
+        config_entry.data[CONF_HOST],
+        config_entry.data[CONF_USERNAME],
+        config_entry.data[CONF_PASSWORD],
+        unit_system,
+    )
     _LOGGER.debug("Connected to Meteobridge Platform")
 
-    hass.data[CONF_NAME] = name
+    hass.data[CONF_NAME] = config_entry.data[CONF_NAME]
 
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
         name=DOMAIN,
         update_method=mb_server.update,
-        update_interval=scan_interval,
+        update_interval=DEFAULT_SCAN_INTERVAL,
     )
 
     # Fetch initial data so we have data when entities subscribe
@@ -113,164 +75,15 @@ async def async_setup(hass: core.HomeAssistant, config: dict) -> bool:
         "mb": mb_server,
     }
 
+    for platform in METEOBRIDGE_PLATFORMS:
+        hass.async_create_task(
+            hass.config_entries.async_forward_entry_setup(config_entry, platform)
+        )
     return True
 
 
-class WeatherEntityExt(Entity):
-    """ABC for weather data. Extended with extra Attributes"""
-
-    @property
-    def temperature(self):
-        """Return the platform temperature."""
-        raise NotImplementedError()
-
-    @property
-    def temperature_unit(self):
-        """Return the unit of measurement."""
-        raise NotImplementedError()
-
-    @property
-    def pressure(self):
-        """Return the pressure."""
-        return None
-
-    @property
-    def humidity(self):
-        """Return the humidity."""
-        raise NotImplementedError()
-
-    @property
-    def wind_speed(self):
-        """Return the wind speed."""
-        return None
-
-    @property
-    def wind_bearing(self):
-        """Return the wind bearing."""
-        return None
-
-    @property
-    def ozone(self):
-        """Return the ozone level."""
-        return None
-
-    @property
-    def attribution(self):
-        """Return the attribution."""
-        return None
-
-    @property
-    def visibility(self):
-        """Return the visibility."""
-        return None
-
-    @property
-    def rain_today(self):
-        """Return the Precipitation for the day."""
-        return None
-
-    @property
-    def rain_rate(self):
-        """Return the current Precipitation rate."""
-        return None
-
-    @property
-    def precip_probability(self):
-        """Return the Precipitation Probability."""
-        return None
-
-    @property
-    def forecast(self):
-        """Return the forecast."""
-        return None
-
-    @property
-    def precision(self):
-        """Return the forecast."""
-        return (
-            PRECISION_TENTHS
-            if self.temperature_unit == TEMP_CELSIUS
-            else PRECISION_WHOLE
-        )
-
-    @property
-    def state_attributes(self):
-        """Return the state attributes."""
-        data = {}
-        if self.temperature is not None:
-            data[ATTR_WEATHER_TEMPERATURE] = show_temp(
-                self.hass, self.temperature, self.temperature_unit, self.precision
-            )
-
-        humidity = self.humidity
-        if humidity is not None:
-            data[ATTR_WEATHER_HUMIDITY] = round(humidity)
-
-        ozone = self.ozone
-        if ozone is not None:
-            data[ATTR_WEATHER_OZONE] = ozone
-
-        precip_probability = self.precip_probability
-        if precip_probability is not None:
-            data[ATTR_WEATHER_PRECIP_PPROBABILIY] = precip_probability
-
-        pressure = self.pressure
-        if pressure is not None:
-            data[ATTR_WEATHER_PRESSURE] = pressure
-
-        wind_bearing = self.wind_bearing
-        if wind_bearing is not None:
-            data[ATTR_WEATHER_WIND_BEARING] = wind_bearing
-
-        wind_speed = self.wind_speed
-        if wind_speed is not None:
-            data[ATTR_WEATHER_WIND_SPEED] = wind_speed
-
-        visibility = self.visibility
-        if visibility is not None:
-            data[ATTR_WEATHER_VISIBILITY] = visibility
-
-        rain_today = self.rain_today
-        if rain_today is not None:
-            data[ATTR_WEATHER_RAINTODAY] = rain_today
-
-        rain_rate = self.rain_rate
-        if rain_rate is not None:
-            data[ATTR_WEATHER_RAINRATE] = rain_rate
-
-        attribution = self.attribution
-        if attribution is not None:
-            data[ATTR_WEATHER_ATTRIBUTION] = attribution
-
-        if self.forecast is not None:
-            forecast = []
-            for forecast_entry in self.forecast:
-                forecast_entry = dict(forecast_entry)
-                forecast_entry[ATTR_FORECAST_TEMP] = show_temp(
-                    self.hass,
-                    forecast_entry[ATTR_FORECAST_TEMP],
-                    self.temperature_unit,
-                    self.precision,
-                )
-                if ATTR_FORECAST_TEMP_LOW in forecast_entry:
-                    forecast_entry[ATTR_FORECAST_TEMP_LOW] = show_temp(
-                        self.hass,
-                        forecast_entry[ATTR_FORECAST_TEMP_LOW],
-                        self.temperature_unit,
-                        self.precision,
-                    )
-                forecast.append(forecast_entry)
-
-            data[ATTR_FORECAST] = forecast
-
-        return data
-
-    @property
-    def state(self):
-        """Return the current state."""
-        return self.condition
-
-    @property
-    def condition(self):
-        """Return the current condition."""
-        raise NotImplementedError()
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
+    for platform in METEOBRIDGE_PLATFORMS:
+        await hass.config_entries.async_forward_entry_unload(config_entry, platform)
+    return True

@@ -19,5 +19,6 @@ CONF_WIND_UNIT = "wind_unit"
 ATTR_UPDATED = "updated"
 
 DEFAULT_ATTRIBUTION = "Weather data delivered by a Meteobridge powered Weather Station"
+DEFAULT_USERNAME = "meteobridge"
 
 LOGGER = logging.getLogger(__package__)

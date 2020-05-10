@@ -1,0 +1,18 @@
+{
+    "config": {
+        "error": {
+            "ip_exists": "Host already already configured",
+            "host_not_found": "The Meteobridge Station cannot be contacted"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "host": "Meteobridge IP Address",
+                    "username": "Username",
+                    "password": "Password"
+                },
+                "title": "Setup Meteobridge Sensors"
+            }
+        }
+    }
+}

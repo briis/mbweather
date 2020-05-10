@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Setup Meteobridge Sensors",
+                "data": {
+                    "host": "Meteobridge IP Address",
+                    "username": "Username",
+                    "password": "Password"
+                }
+            }
+        },
+        "error": {
+            "ip_exists": "Host already already configured",
+            "host_not_found": "The Meteobridge Station cannot be contacted"
+        }
+    }
+}

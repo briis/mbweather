@@ -2,7 +2,10 @@
     "domain": "mbweather",
     "name": "Meteobridge Weather",
     "documentation": "https://github.com/briis/mbweather",
+    "config_flow": true,
     "dependencies": [],
-    "codeowners": ["@briis"],
-    "requirements": ["python-forecastio==1.4.0"]
+    "codeowners": [
+        "@briis"
+    ],
+    "requirements": []
 }

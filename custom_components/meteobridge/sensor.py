@@ -14,6 +14,7 @@ from homeassistant.util import slugify
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
     CONF_NAME,
+    CONF_UNIT_SYSTEM,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_PRESSURE,
     DEVICE_CLASS_TEMPERATURE,
@@ -24,12 +25,12 @@ from homeassistant.helpers.entity import Entity
 
 from . import MBDATA
 from .const import (
+    ATTR_UPDATED,
     DOMAIN,
     DEFAULT_ATTRIBUTION,
     ENTITY_ID_SENSOR_FORMAT,
     ENTITY_UNIQUE_ID,
-    CONF_WIND_UNIT,
-    ATTR_UPDATED,
+    DISPLAY_UNIT_SYSTEMS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,124 +38,139 @@ _LOGGER = logging.getLogger(__name__)
 SENSOR_TYPES = {
     "temperature": [
         "Temperature",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
     "temphigh": [
         "Temp High Today",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
     "templow": [
         "Temp Low Today",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
     "in_temperature": [
         "Indoor Temp",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
     "dewpoint": [
         "Dewpoint",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
     "windchill": [
         "Wind Chill",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
     "heatindex": [
         "Heatindex",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
     "feels_like": [
         "Feels Like",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
-    "windspeedavg": ["Wind Speed Avg", "m/s", "mdi:weather-windy", None, "mph"],
-    "windspeed": ["Wind Speed", "m/s", "mdi:weather-windy", None, "mph"],
-    "windbearing": ["Wind Bearing", "°", "mdi:compass-outline", None, None],
-    "winddirection": ["Wind Direction", "", "mdi:compass-outline", None, None],
-    "windgust": ["Wind Gust", "m/s", "mdi:weather-windy", None, "mph"],
-    "raintoday": ["Rain today", "mm", "mdi:weather-rainy", None, "in"],
-    "rainrate": ["Rain rate", "mm/h", "mdi:weather-pouring", None, "in/h"],
-    "humidity": ["Humidity", "%", "mdi:water-percent", DEVICE_CLASS_HUMIDITY, None],
-    "in_humidity": [
-        "Indoor Hum",
-        "%",
-        "mdi:water-percent",
-        DEVICE_CLASS_HUMIDITY,
+    "windspeedavg": [
+        "Wind Speed Avg",
+        ["m/s", "mph", "km/h"],
+        "mdi:weather-windy",
         None,
     ],
-    "pressure": ["Pressure", "hPa", "mdi:gauge", DEVICE_CLASS_PRESSURE, "inHg"],
-    "uvindex": ["UV Index", "UVI", "mdi:weather-sunny-alert", None, "UVI"],
-    "solarrad": ["Solar Radiation", "W/m2", "mdi:weather-sunny", None, "W/m2"],
-    "forecast": ["Forecast", "", "mdi:text-short", None, None],
+    "windspeed": ["Wind Speed", ["m/s", "mph", "km/h"], "mdi:weather-windy", None],
+    "windbearing": ["Wind Bearing", ["°", "°", "°"], "mdi:compass-outline", None],
+    "winddirection": ["Wind Direction", ["", "", ""], "mdi:compass-outline", None],
+    "windgust": ["Wind Gust", ["m/s", "mph", "km/h"], "mdi:weather-windy", None],
+    "raintoday": ["Rain today", ["mm", "in", "mm"], "mdi:weather-rainy", None],
+    "rainrate": ["Rain rate", ["mm/h", "in/h", "mm/h"], "mdi:weather-pouring", None],
+    "humidity": [
+        "Humidity",
+        ["%", "%", "%"],
+        "mdi:water-percent",
+        DEVICE_CLASS_HUMIDITY,
+    ],
+    "in_humidity": [
+        "Indoor Hum",
+        ["%", "%", "%"],
+        "mdi:water-percent",
+        DEVICE_CLASS_HUMIDITY,
+    ],
+    "pressure": [
+        "Pressure",
+        ["hPa", "inHg", "hPa"],
+        "mdi:gauge",
+        DEVICE_CLASS_PRESSURE,
+    ],
+    "uvindex": ["UV Index", ["UVI", "UVI", "UVI"], "mdi:weather-sunny-alert", None],
+    "solarrad": [
+        "Solar Radiation",
+        ["W/m2", "W/m2", "W/m2"],
+        "mdi:weather-sunny",
+        None,
+    ],
+    "forecast": ["Forecast", ["", "", ""], "mdi:text-short", None],
     "temp_mmin": [
         "Temp Month Min",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
     "temp_mmax": [
         "Temp Month Max",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
     "temp_ymin": [
         "Temp Year Min",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
     "temp_ymax": [
         "Temp Year Max",
-        TEMP_CELSIUS,
+        [TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_CELSIUS],
         "mdi:thermometer",
         DEVICE_CLASS_TEMPERATURE,
-        TEMP_FAHRENHEIT,
     ],
-    "windspeed_mmax": ["Wind Speed Month Max", "m/s", "mdi:weather-windy", None, "mph"],
-    "windspeed_ymax": ["Wind Speed Year Max", "m/s", "mdi:weather-windy", None, "mph"],
-    "rain_mmax": ["Rain Month Total", "mm", "mdi:weather-rainy", None, "in"],
-    "rain_ymax": ["Rain Year Total", "mm", "mdi:weather-rainy", None, "in"],
+    "windspeed_mmax": [
+        "Wind Speed Month Max",
+        ["m/s", "mph", "km/h"],
+        "mdi:weather-windy",
+        None,
+    ],
+    "windspeed_ymax": [
+        "Wind Speed Year Max",
+        ["m/s", "mph", "km/h"],
+        "mdi:weather-windy",
+        None,
+    ],
+    "rain_mmax": ["Rain Month Total", ["mm", "in", "mm"], "mdi:weather-rainy", None],
+    "rain_ymax": ["Rain Year Total", ["mm", "in", "mm"], "mdi:weather-rainy", None],
     "rainrate_mmax": [
         "Rain rate Month Max",
-        "mm/h",
+        ["mm/h", "in/h", "mm/h"],
         "mdi:weather-pouring",
         None,
-        "in/h",
     ],
     "rainrate_ymax": [
         "Rain rate Year Max",
-        "mm/h",
+        ["mm/h", "in/h", "mm/h"],
         "mdi:weather-pouring",
         None,
-        "in/h",
     ],
 }
 
@@ -167,15 +183,12 @@ async def async_setup_entry(
     if not coordinator.data:
         return
 
-    unit_system = "metric" if hass.config.units.is_metric else "imperial"
+    unit_system = hass.data[CONF_UNIT_SYSTEM]
     name = slugify(hass.data[CONF_NAME])
-    wind_unit = hass.data[CONF_WIND_UNIT]
 
     sensors = []
     for sensor in SENSOR_TYPES:
-        sensors.append(
-            MeteobridgeSensor(coordinator, sensor, name, unit_system, wind_unit)
-        )
+        sensors.append(MeteobridgeSensor(coordinator, sensor, name, unit_system))
         _LOGGER.debug(f"SENSOR ADDED: {sensor}")
 
     async_add_entities(sensors, True)
@@ -184,12 +197,11 @@ async def async_setup_entry(
 class MeteobridgeSensor(Entity):
     """ Implementation of a SmartWeather Weatherflow Current Sensor. """
 
-    def __init__(self, coordinator, sensor, name, unit_system, wind_unit):
+    def __init__(self, coordinator, sensor, name, unit_system):
         """Initialize the sensor."""
         self.coordinator = coordinator
         self._sensor = sensor
         self._unit_system = unit_system
-        self._wind_unit = wind_unit
         self._state = None
         self.entity_id = ENTITY_ID_SENSOR_FORMAT.format(self._sensor)
         self._name = SENSOR_TYPES[self._sensor][0]
@@ -208,35 +220,14 @@ class MeteobridgeSensor(Entity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        if self._sensor in self.coordinator.data:
-            if not (self.coordinator.data[self._sensor] is None):
-                self._state = self.coordinator.data[self._sensor]
-                if SENSOR_TYPES[self._sensor][1] == "m/s":
-                    return (
-                        round(self._state * 3.6, 1)
-                        if self._wind_unit == "kmh"
-                        else self._state
-                    )
-                else:
-                    return self._state
-        return None
+        return self.coordinator.data[self._sensor]
 
     @property
     def unit_of_measurement(self):
         """Return the unit of measurement."""
-        if self._unit_system == "imperial" and not (
-            SENSOR_TYPES[self._sensor][4] is None
-        ):
-            return SENSOR_TYPES[self._sensor][4]
-        else:
-            if SENSOR_TYPES[self._sensor][1] == "m/s":
-                return (
-                    "km/h"
-                    if self._wind_unit == "kmh"
-                    else SENSOR_TYPES[self._sensor][1]
-                )
-            else:
-                return SENSOR_TYPES[self._sensor][1]
+        unit_system_index = DISPLAY_UNIT_SYSTEMS.index(self._unit_system)
+        unit_array = SENSOR_TYPES[self._sensor][1]
+        return unit_array[unit_system_index]
 
     @property
     def icon(self):

@@ -7,18 +7,18 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_PASSWORD,
     CONF_NAME,
+    CONF_UNIT_SYSTEM,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import aiohttp_client
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import slugify
 
-from .meteobridge import Meteobridge, UnexpectedError
+from pymeteobridgeio import Meteobridge, UnexpectedError
 from .const import (
-    CONF_WIND_UNIT,
     DOMAIN,
     DEFAULT_USERNAME,
-    DEFAULT_METRIC_WIND_UNIT,
+    DISPLAY_UNIT_SYSTEMS,
 )
 
 
@@ -77,7 +77,7 @@ class MeteobridgeFlowHandler(config_entries.ConfigFlow):
 
     async def _show_config_form(self, username: str = None, name: str = None):
         """Show the configuration form to edit station data."""
-        wind_unit = "m/s" if self.hass.config.units.is_metric else "mph"
+        _unit_system = "metric" if self.hass.config.units.is_metric else "imperial"
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
@@ -86,7 +86,9 @@ class MeteobridgeFlowHandler(config_entries.ConfigFlow):
                     vol.Required(CONF_USERNAME, default=username): str,
                     vol.Required(CONF_PASSWORD): str,
                     vol.Required(CONF_NAME, default=name): str,
-                    vol.Required(CONF_WIND_UNIT, default=wind_unit): str,
+                    vol.Required(CONF_UNIT_SYSTEM, default=_unit_system): vol.In(
+                        DISPLAY_UNIT_SYSTEMS
+                    ),
                 }
             ),
             errors=self._errors,

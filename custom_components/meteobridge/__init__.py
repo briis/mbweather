@@ -9,6 +9,7 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_PASSWORD,
     CONF_SCAN_INTERVAL,
+    CONF_UNIT_SYSTEM,
 )
 
 from homeassistant.config_entries import ConfigEntry
@@ -23,9 +24,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.helpers import update_coordinator
 
 from .config_flow import meteobridge_hosts
-from .meteobridge import Meteobridge, UnexpectedError
+from pymeteobridgeio import Meteobridge, UnexpectedError
 from .const import (
-    CONF_WIND_UNIT,
     DOMAIN,
     DEFAULT_ATTRIBUTION,
     METEOBRIDGE_PLATFORMS,
@@ -60,7 +60,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     _LOGGER.debug("Connected to Meteobridge Platform")
 
     hass.data[CONF_NAME] = config_entry.data[CONF_NAME]
-    hass.data[CONF_WIND_UNIT] = config_entry.data[CONF_WIND_UNIT]
+    hass.data[CONF_UNIT_SYSTEM] = config_entry.data[CONF_UNIT_SYSTEM]
 
     coordinator = DataUpdateCoordinator(
         hass,

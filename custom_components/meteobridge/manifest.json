@@ -7,5 +7,7 @@
     "codeowners": [
         "@briis"
     ],
-    "requirements": []
+    "requirements": [
+        "pymeteobridgeio==0.2"
+    ]
 }

@@ -10,8 +10,8 @@
                     "host": "Meteobridge IP adresse",
                     "username": "Brugernavn",
                     "password": "Kodeord",
-                    "name": "Navn",
-                    "windunit": "Vind enhed - Skriv kmh for Km pr time. (Anvendes kun ved metric enheder)"
+                    "name": "Integrationens navn",
+                    "unit_system": "Vælg hvilket enhedssystem data skal vises i"
                 },
                 "title": "Installer Meteobridge Sensorer"
             }

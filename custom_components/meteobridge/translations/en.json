@@ -10,8 +10,8 @@
                     "host": "Meteobridge IP Address",
                     "username": "Username",
                     "password": "Password",
-                    "name": "Name",
-                    "windunit": "Wind Unit - Specify kmh for Km pr. hour. (Only applies if metric unit system)"
+                    "name": "Integration Name",
+                    "unit_system": "Select the Unit System to display data in"
                 },
                 "title": "Setup Meteobridge Sensors"
             }

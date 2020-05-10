@@ -169,7 +169,7 @@ async def async_setup_entry(
 
     unit_system = "metric" if hass.config.units.is_metric else "imperial"
     name = slugify(hass.data[CONF_NAME])
-    wind_unit = "m/s"
+    wind_unit = hass.data[CONF_WIND_UNIT]
 
     sensors = []
     for sensor in SENSOR_TYPES:

@@ -1,0 +1,20 @@
+{
+    "config": {
+        "error": {
+            "ip_exists": "Denne Meteobridge er allerede kongigureret",
+            "host_not_found": "Meteobridge Sstation kan ikke kontaktes"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "host": "Meteobridge IP adresse",
+                    "username": "Brugernavn",
+                    "password": "Kodeord",
+                    "name": "Navn",
+                    "windunit": "Vind enhed - Skriv kmh for Km pr time. (Anvendes kun ved metric enheder)"
+                },
+                "title": "Installer Meteobridge Sensorer"
+            }
+        }
+    }
+}

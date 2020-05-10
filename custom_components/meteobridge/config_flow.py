@@ -15,8 +15,10 @@ from homeassistant.util import slugify
 
 from .meteobridge import Meteobridge, UnexpectedError
 from .const import (
+    CONF_WIND_UNIT,
     DOMAIN,
     DEFAULT_USERNAME,
+    DEFAULT_METRIC_WIND_UNIT,
 )
 
 
@@ -75,6 +77,7 @@ class MeteobridgeFlowHandler(config_entries.ConfigFlow):
 
     async def _show_config_form(self, username: str = None, name: str = None):
         """Show the configuration form to edit station data."""
+        wind_unit = "m/s" if self.hass.config.units.is_metric else "mph"
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
@@ -83,6 +86,7 @@ class MeteobridgeFlowHandler(config_entries.ConfigFlow):
                     vol.Required(CONF_USERNAME, default=username): str,
                     vol.Required(CONF_PASSWORD): str,
                     vol.Required(CONF_NAME, default=name): str,
+                    vol.Required(CONF_WIND_UNIT, default=wind_unit): str,
                 }
             ),
             errors=self._errors,

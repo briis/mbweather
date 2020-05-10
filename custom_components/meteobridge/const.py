@@ -15,11 +15,12 @@ METEOBRIDGE_PLATFORMS = [
     "sensor",
 ]
 
-CONF_WIND_UNIT = "wind_unit"
+CONF_WIND_UNIT = "windunit"
 
 ATTR_UPDATED = "updated"
 
 DEFAULT_ATTRIBUTION = "Data delivered by a Meteobridge powered Weather Station"
 DEFAULT_USERNAME = "meteobridge"
+DEFAULT_METRIC_WIND_UNIT = "m/s"
 
 LOGGER = logging.getLogger(__package__)

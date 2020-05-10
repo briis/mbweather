@@ -78,6 +78,7 @@ class MeteobridgeFlowHandler(config_entries.ConfigFlow):
     async def _show_config_form(self, username: str = None, name: str = None):
         """Show the configuration form to edit station data."""
         _unit_system = "metric" if self.hass.config.units.is_metric else "imperial"
+
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(

@@ -47,7 +47,7 @@ async def async_setup(hass: HomeAssistant, config: Config) -> bool:
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up Meteobridge platforms as config entry."""
 
-    unit_system = "metric" if hass.config.units.is_metric else "imperial"
+    unit_system = config_entry.data[CONF_UNIT_SYSTEM]
     session = async_get_clientsession(hass)
 
     mb_server = Meteobridge(
@@ -60,7 +60,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     _LOGGER.debug("Connected to Meteobridge Platform")
 
     hass.data[CONF_NAME] = config_entry.data[CONF_NAME]
-    hass.data[CONF_UNIT_SYSTEM] = config_entry.data[CONF_UNIT_SYSTEM]
+    hass.data[CONF_UNIT_SYSTEM] = unit_system
 
     coordinator = DataUpdateCoordinator(
         hass,

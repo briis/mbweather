@@ -14,7 +14,7 @@
         },
         "error": {
             "ip_exists": "Host already already configured",
-            "host_not_found": "The Meteobridge Station cannot be contacted"
+            "host_not_found": "The Meteobridge Station cannot be contacted. Check IP Address and password"
         }
     }
 }

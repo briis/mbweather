@@ -9,7 +9,8 @@
                 "data": {
                     "host": "Meteobridge IP Address",
                     "username": "Username",
-                    "password": "Password"
+                    "password": "Password",
+                    "name": "Name"
                 },
                 "title": "Setup Meteobridge Sensors"
             }

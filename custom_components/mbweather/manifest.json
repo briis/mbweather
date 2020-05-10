@@ -1,5 +1,5 @@
 {
-    "domain": "mbweather",
+    "domain": "meteobridge",
     "name": "Meteobridge Weather",
     "documentation": "https://github.com/briis/mbweather",
     "config_flow": true,

@@ -6,6 +6,7 @@ from homeassistant.const import (
     CONF_HOST,
     CONF_USERNAME,
     CONF_PASSWORD,
+    CONF_NAME,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import aiohttp_client
@@ -62,7 +63,7 @@ class MeteobridgeFlowHandler(config_entries.ConfigFlow):
 
         # Fill in default values in form
         if not meteobridge_hosts(self.hass):
-            return await self._show_config_form(username=DEFAULT_USERNAME)
+            return await self._show_config_form(username=DEFAULT_USERNAME, name=DOMAIN)
 
         return await self._show_config_form()
 
@@ -72,7 +73,7 @@ class MeteobridgeFlowHandler(config_entries.ConfigFlow):
             return True
         return False
 
-    async def _show_config_form(self, username: str = None):
+    async def _show_config_form(self, username: str = None, name: str = None):
         """Show the configuration form to edit station data."""
         return self.async_show_form(
             step_id="user",
@@ -81,6 +82,7 @@ class MeteobridgeFlowHandler(config_entries.ConfigFlow):
                     vol.Required(CONF_HOST): str,
                     vol.Required(CONF_USERNAME, default=username): str,
                     vol.Required(CONF_PASSWORD): str,
+                    vol.Required(CONF_NAME, default=name): str,
                 }
             ),
             errors=self._errors,

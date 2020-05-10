@@ -141,26 +141,6 @@ class Meteobridge:
                     self._israining = True if float(self._rainrate) > 0 else False
                     self._islowbat = True if float(self._lowbat) > 0 else False
 
-                    # Data below is comming from Dark Sky, and is updated by external component. Thus we need to check if available
-                    # and don't overwrite values if present.
-                    if "condition" in self.sensor_data:
-                        if self.sensor_data["condition"] is not None:
-                            self._condition = self.sensor_data["condition"]
-                        else:
-                            self._condition = None
-                    else:
-                        self._condition = None
-
-                    if "precip_probability" in self.sensor_data:
-                        if self.sensor_data["precip_probability"] is not None:
-                            self._precip_probability = self.sensor_data[
-                                "precip_probability"
-                            ]
-                        else:
-                            self._precip_probability = None
-                    else:
-                        self._precip_probability = None
-
                 item = {
                     "in_temperature": self._intemp,
                     "in_humidity": self._inhum,
@@ -187,8 +167,6 @@ class Meteobridge:
                     "freezing": self._isfreezing,
                     "forecast": self._fc,
                     "time": self._timestamp.strftime("%d-%m-%Y %H:%M:%S"),
-                    "condition": self._condition,
-                    "precip_probability": self._precip_probability,
                     "temp_mmin": self._tempmmin,
                     "temp_mmax": self._tempmmax,
                     "temp_ymin": self._tempymin,

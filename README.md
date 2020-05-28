@@ -2,6 +2,12 @@
 ![GitHub release](https://img.shields.io/github/release/briis/mbweather.svg)
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
+## ***** Custom Component no longer maintained *****
+This Custom Component will no longer be maintained. It has been replaced with a new program called *Meteobridge Datalogger* which you can [find here](https://github.com/briis/meteobridge)
+The new Integration does not have a `weather` component. I decided to remove `weather` as it was based on *DarkSky* which has recently been bought by Apple, and will discontinue service.
+
+___
+
 This a *Custom Integration* for [Home Assistant](https://www.home-assistant.io/). It combines real-time weather readings from a Meteobridge Weather Logger and Forecast data from *Dark Sky*.
 
 [*Meteobridge*](https://www.meteobridge.com/wiki/index.php/Home) is a small device that connects your personal weather station to public weather networks like "Weather Underground". This allows you to feed your micro climate data to a weather network in the Internet and to have it there visible from wherever you are. Meteobridge also has many ways of delivering data to your local network, and this furthermore reduces the dependencies for Cloud Services when you need very local Weather Data.<br>
